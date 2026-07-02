@@ -1,0 +1,34 @@
+graph TD
+    subgraph "Camada 1: Raw Sources"
+        RS[("📄 Fontes Brutas<br/>PDFs, logs, transcrições")]
+    end
+
+    subgraph "Camada 2: Wiki (Síntese)"
+        W[("📚 Páginas de Síntese<br/>Markdown + OKF")]
+        IDX[("📇 Índice Central<br/>index.md")]
+        W --> IDX
+    end
+
+    subgraph "Camada 3: Schema (Governança)"
+        AG[("🏛️ AGENTS.md<br/>Regras de Governança")]
+        SK[("🧩 Skills<br/>Capacidades Modulares")]
+        WF[("🌊 Workflows<br/>Pipelines de Execução")]
+        RU[("📏 Rules<br/>Padrões Técnicos")]
+    end
+
+    RS -->|"Ingest"| W
+    W -->|"Query"| RS
+    W -->|"Lint"| W
+    AG --> SK
+    AG --> WF
+    AG --> RU
+    SK -->|"opera sobre"| W
+    WF -->|"alimenta"| W
+
+    style RS fill:#1a1a2e,stroke:#e94560,color:#eee
+    style W fill:#1a1a2e,stroke:#0f3460,color:#eee
+    style IDX fill:#1a1a2e,stroke:#16213e,color:#eee
+    style AG fill:#1a1a2e,stroke:#533483,color:#eee
+    style SK fill:#1a1a2e,stroke:#533483,color:#eee
+    style WF fill:#1a1a2e,stroke:#533483,color:#eee
+    style RU fill:#1a1a2e,stroke:#533483,color:#eee
