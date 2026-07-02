@@ -18,7 +18,7 @@ printf "${BLUE}${BOLD}⬡ Okam pre-push: Executando validação OKF completa...$
 # Check if okam CLI is available
 if ! command -v okam >/dev/null 2>&1; then
     printf "${YELLOW}  ⚠ okam CLI não encontrado. Pulando validação OKF.${RESET}\n"
-    printf "${YELLOW}    Instale com: pip install -e . (na raiz do projeto Okam)${RESET}\n"
+    printf "${YELLOW}    Instale com: pip install okam${RESET}\n"
     exit 0
 fi
 

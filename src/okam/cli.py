@@ -26,6 +26,7 @@ from okam.hooks import (
     get_hooks_status,
     HOOK_NAMES,
 )
+from okam.doctor import run_doctor
 
 
 def get_default_wiki_dir():
@@ -40,7 +41,7 @@ def get_default_wiki_dir():
     return os.path.abspath(os.path.join("knowledge", "wiki"))
 
 
-def cmd_init(wiki_dir):
+def cmd_init(wiki_dir, auto_yes=False):
     """Gera seed pages com frontmatter OKF válido."""
     print_colored(f"Inicializando base de conhecimento OKF em: {wiki_dir}...", COLOR_BLUE)
     os.makedirs(wiki_dir, exist_ok=True)
@@ -169,27 +170,33 @@ Controlam como o conhecimento é criado, validado e mantido.
 
     print_colored(f"\n✅ {created} seed page(s) criada(s) em {wiki_dir}", COLOR_GREEN + COLOR_BOLD)
 
-    # Oferecer instalação de hooks
-    try:
-        resp = ask_question(
-            "Deseja instalar os Git hooks de governança?",
-            default="sim"
-        ).lower()
-        if resp in ['s', 'sim', 'y', 'yes']:
-            print_colored("\nInstalando hooks de governança...", COLOR_BLUE)
-            installed, skipped, errors = install_hooks()
-            if errors == 0:
-                print_colored(
-                    f"✅ {installed} hook(s) instalado(s).",
-                    COLOR_GREEN + COLOR_BOLD
-                )
-            else:
-                print_colored(
-                    f"⚠ {installed} instalado(s), {errors} erro(s).",
-                    COLOR_YELLOW
-                )
-    except (KeyboardInterrupt, EOFError):
-        pass  # Non-interactive ou cancelado — pular silenciosamente
+    # Oferecer instalação de hooks (pular se chamado via setup com --yes)
+    if not auto_yes:
+        try:
+            resp = ask_question(
+                "Deseja instalar os Git hooks de governança?",
+                default="sim"
+            ).lower()
+            if resp in ['s', 'sim', 'y', 'yes']:
+                _install_hooks_with_feedback()
+        except (KeyboardInterrupt, EOFError):
+            pass  # Non-interactive ou cancelado — pular silenciosamente
+
+
+def _install_hooks_with_feedback(skip=None):
+    """Instala hooks e exibe feedback. Helper compartilhado por init e setup."""
+    print_colored("\nInstalando hooks de governança...", COLOR_BLUE)
+    installed, skipped_count, errors = install_hooks(skip_hooks=skip or [])
+    if errors == 0:
+        print_colored(
+            f"✅ {installed} hook(s) instalado(s).",
+            COLOR_GREEN + COLOR_BOLD
+        )
+    else:
+        print_colored(
+            f"⚠ {installed} instalado(s), {errors} erro(s).",
+            COLOR_YELLOW
+        )
 
 
 def cmd_validate(wiki_dir):
@@ -345,6 +352,23 @@ def main():
     # Comando new-skill
     subparsers.add_parser("new-skill", help="Cria interativamente uma nova skill na pasta .agents/skills")
 
+    # Comando doctor
+    subparsers.add_parser("doctor", help="Diagnóstico de ambiente e saúde da instalação")
+
+    # Comando setup
+    p_setup = subparsers.add_parser("setup", help="Configuração completa: init + hooks install")
+    p_setup.add_argument("--wiki-dir", help="Diretório destino do wiki (default: autodetect)")
+    p_setup.add_argument(
+        "--yes", "-y",
+        action="store_true",
+        help="Modo não-interativo: pula todas as confirmações"
+    )
+    p_setup.add_argument(
+        "--skip-commit-msg",
+        action="store_true",
+        help="Não instalar o hook de Conventional Commits"
+    )
+
     # Comando hooks
     p_hooks = subparsers.add_parser("hooks", help="Gerencia Git hooks de governança")
     p_hooks_sub = p_hooks.add_subparsers(dest="hooks_action", help="Ação dos hooks")
@@ -384,6 +408,22 @@ def main():
         cmd_index(wiki_dir)
     elif args.command == "new-skill":
         create_new_skill()
+    elif args.command == "doctor":
+        success = run_doctor()
+        sys.exit(0 if success else 1)
+    elif args.command == "setup":
+        auto_yes = getattr(args, "yes", False)
+        print_colored("⬡ Okam Setup — Configuração Completa\n", COLOR_BLUE + COLOR_BOLD)
+        # Fase 1: Init
+        cmd_init(wiki_dir, auto_yes=auto_yes)
+        # Fase 2: Hooks
+        skip = []
+        if getattr(args, "skip_commit_msg", False):
+            skip.append("commit-msg")
+        _install_hooks_with_feedback(skip=skip)
+        # Fase 3: Doctor
+        print()
+        run_doctor()
     elif args.command == "hooks":
         cmd_hooks(args)
 

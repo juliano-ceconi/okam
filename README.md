@@ -30,19 +30,17 @@ Okam resolve isso com:
 ## Quick Start (5 minutos)
 
 ```bash
-# 1. Clone e instale localmente em modo de desenvolvimento
-git clone https://github.com/juliano-ceconi/okam.git
-cd okam
-pip install -e .
+# 1. Instale o pacote
+pip install okam
 
-# 2. Inicialize o wiki com seed pages
-okam init
+# 2. Inicialize o wiki e os hooks interativamente (all-in-one)
+okam setup
 
 # 3. Customize o AGENTS.md com as regras do seu projeto
 # (edite AGENTS.md com suas preferências)
 
-# 4. Valide a conformidade
-okam validate
+# 4. Verifique a saúde do ambiente
+okam doctor
 
 # 5. Crie uma nova skill interativamente
 okam new-skill

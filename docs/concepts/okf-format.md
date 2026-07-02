@@ -47,18 +47,23 @@ parent: "[[index]]"
 
 ## Validação
 
-Use o OKF Manager para validar seus documentos:
+Use o CLI do Okam para validar seus documentos:
 
 ```bash
 # Validar todos os arquivos
-python ./knowledge/scripts/okf_manager.py --validate
+okam validate
 
 # Ver índice de metadados
-python ./knowledge/scripts/okf_manager.py --dump-index
+okam index
 
 # Gerar seed pages
-python ./knowledge/scripts/okf_manager.py --init
+okam init
+
+# Diagnóstico do ambiente
+okam doctor
 ```
+
+> **Nota:** O script legado `python ./knowledge/scripts/okf_manager.py` continua funcionando como wrapper de compatibilidade.
 
 ## Regras de Ouro
 

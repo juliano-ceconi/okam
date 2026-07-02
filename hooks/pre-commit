@@ -41,7 +41,7 @@ if [ -n "$WIKI_FILES" ]; then
         done
     else
         printf "${YELLOW}  ⚠ okam CLI não encontrado. Pulando validação OKF.${RESET}\n"
-        printf "${YELLOW}    Instale com: pip install -e . (na raiz do projeto Okam)${RESET}\n"
+        printf "${YELLOW}    Instale com: pip install okam${RESET}\n"
     fi
 fi
 

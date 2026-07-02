@@ -5,19 +5,39 @@
 - Python 3.8+ (para o validador OKF)
 - Git
 
-## 1. Instale o CLI
+## 1. Instalação
 
-Clone o repositório e instale o CLI localmente em modo editável:
+Você pode instalar o Okam oficialmente pelo PyPI (recomendado) ou via código-fonte.
 
+**Opção A: PyPI (Recomendado)**
+```bash
+pip install okam
+```
+
+**Opção B: Via Código-Fonte (Modo Dev)**
 ```bash
 git clone https://github.com/juliano-ceconi/okam.git
 cd okam
 pip install -e .
 ```
 
-Isso tornará o comando global `okam` disponível no seu terminal.
+O comando global `okam` ficará disponível no seu terminal.
 
-## 2. Inicialize o Wiki
+## 2. Inicialização Rápida (Onboarding)
+
+O Okam tem um comando `setup` que faz a inicialização completa de uma vez:
+
+```bash
+okam setup
+```
+
+Isso irá interativamente:
+1. Criar a estrutura do wiki e as 3 seed pages iniciais.
+2. Perguntar se você deseja instalar os Git Hooks de governança.
+
+*(Para automação em CI/CD ou evitar prompts, use `okam setup --yes`)*
+
+Caso prefira passos manuais em vez do `setup`:
 
 O comando `okam init` cria a estrutura inicial do wiki e gera 3 seed pages com frontmatter OKF válido:
 
@@ -65,6 +85,8 @@ okam index
 
 ## 6. Instale os Git Hooks de Governança
 
+*Se você já instalou os hooks no passo 2 via `okam setup`, pode pular esta seção.*
+
 O Okam inclui hooks que validam automaticamente antes de cada commit e push:
 
 | Hook | O que faz |
@@ -88,6 +110,14 @@ okam hooks uninstall
 ```
 
 > **Nota:** Os hooks são scripts shell portáveis (POSIX `sh`) com zero dependências externas. No Windows, rodam automaticamente via Git Bash. Para bypass emergencial, use `--no-verify` (ex: `git commit --no-verify`).
+
+## 7. Verifique a Saúde do Ambiente
+
+O comando `doctor` analisa seu ambiente para garantir que tudo está configurado corretamente (Python, Git, hooks, wiki):
+
+```bash
+okam doctor
+```
 
 ## Próximos Passos
 

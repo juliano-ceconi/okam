@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "okam"
-version = "0.2.0"
+version = "0.3.0"
 description = "Framework de governança de IA, memória persistente e gestão de conhecimento"
 readme = "README.md"
 requires-python = ">=3.8"

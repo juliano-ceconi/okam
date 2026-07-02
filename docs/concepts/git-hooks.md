@@ -76,3 +76,32 @@ git push --no-verify      # Pula pre-push
 - Se já existir um hook, o Okam faz backup automaticamente (`.bak`)
 - No Windows, rodam via Git Bash (incluído no Git for Windows)
 - O marcador `# ⬡ Okam` identifica hooks do framework vs. hooks externos
+
+## Verificando a Instalação
+
+Use `okam doctor` para um diagnóstico completo do ambiente:
+
+```bash
+okam doctor
+```
+
+O doctor verifica: Python (≥ 3.8), Git, repositório inicializado, hooks ativos, wiki presente e AGENTS.md.
+
+## Compatibilidade Windows
+
+Os hooks são scripts POSIX shell que rodam via **Git Bash**, incluído automaticamente no [Git for Windows](https://gitforwindows.org/). Não é necessária nenhuma configuração extra.
+
+O CLI `okam` funciona tanto no **PowerShell** quanto no **Git Bash**:
+
+```powershell
+# PowerShell
+okam hooks install
+okam doctor
+
+# Git Bash
+okam hooks install
+okam doctor
+```
+
+> **Nota:** Os hooks em si são executados pelo Git, que usa Git Bash internamente no Windows. O CLI `okam` roda em qualquer terminal.
+
