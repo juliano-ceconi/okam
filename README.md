@@ -30,19 +30,25 @@ Okam resolve isso com:
 ## Quick Start (5 minutos)
 
 ```bash
-# 1. Clone
+# 1. Clone e instale localmente em modo de desenvolvimento
 git clone https://github.com/juliano-ceconi/okam.git
 cd okam
+pip install -e .
 
 # 2. Inicialize o wiki com seed pages
-python knowledge/scripts/okf_manager.py --init
+okam init
 
 # 3. Customize o AGENTS.md com as regras do seu projeto
 # (edite AGENTS.md com suas preferências)
 
-# 4. Valide
-python knowledge/scripts/okf_manager.py --validate
+# 4. Valide a conformidade
+okam validate
+
+# 5. Crie uma nova skill interativamente
+okam new-skill
 ```
+
+*Nota: O script legado `python knowledge/scripts/okf_manager.py` continua funcionando como um wrapper de compatibilidade.*
 
 Para o guia completo, veja o [QUICKSTART.md](./QUICKSTART.md).
 

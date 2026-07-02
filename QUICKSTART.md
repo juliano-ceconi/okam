@@ -5,28 +5,34 @@
 - Python 3.8+ (para o validador OKF)
 - Git
 
-## 1. Clone o Repositório
+## 1. Instale o CLI
+
+Clone o repositório e instale o CLI localmente em modo editável:
 
 ```bash
 git clone https://github.com/juliano-ceconi/okam.git
 cd okam
+pip install -e .
 ```
+
+Isso tornará o comando global `okam` disponível no seu terminal.
 
 ## 2. Inicialize o Wiki
 
-O comando `--init` gera 3 seed pages com frontmatter OKF válido:
+O comando `okam init` cria a estrutura inicial do wiki e gera 3 seed pages com frontmatter OKF válido:
 
 ```bash
-python knowledge/scripts/okf_manager.py --init
+okam init
 ```
 
 Saída esperada:
 ```
+Inicializando base de conhecimento OKF em: .../knowledge/wiki...
   [CRIADO] index.md
   [CRIADO] getting-started.md
   [CRIADO] architecture.md
 
-✅ 3 seed page(s) criada(s)
+✅ 3 seed page(s) criada(s) em ...
 ```
 
 ## 3. Customize o AGENTS.md
@@ -37,25 +43,24 @@ Abra o `AGENTS.md` na raiz e ajuste as regras para o seu projeto:
 - Ajuste as **Convenções e Regras de Ouro** para o seu time
 - Configure as **Proibições Cruciais** conforme seu contexto
 
-## 4. Crie Sua Primeira Skill
+## 4. Crie Sua Primeira Skill de Forma Interativa
 
-Copie o template e preencha:
+Você não precisa copiar templates manualmente. Use o comando interativo:
 
 ```bash
-# Copie o template
-cp templates/skill-template.md .agents/skills/minha-skill/SKILL.md
+okam new-skill
 ```
 
-Edite o `SKILL.md` com o nome, descrição e instruções da skill.
+O CLI perguntará interativamente o nome, descrição, versão, prioridade e se você deseja criar as subpastas padrão (`scripts/`, `examples/`, `resources/`, `references/`) de apoio, gerando tudo estruturado.
 
-## 5. Valide Tudo
+## 5. Valide Tudo e Gere Índices
 
 ```bash
 # Valida frontmatter OKF de todos os arquivos do wiki
-python knowledge/scripts/okf_manager.py --validate
+okam validate
 
 # Gera tabela com índice de metadados
-python knowledge/scripts/okf_manager.py --dump-index
+okam index
 ```
 
 ## Próximos Passos
@@ -67,4 +72,4 @@ python knowledge/scripts/okf_manager.py --dump-index
 
 ---
 
-> **Dica:** O validador OKF funciona com zero dependências externas. Basta Python 3.8+ instalado.
+> **Dica:** O okam CLI funciona com zero dependências externas de runtime. O script legado `python knowledge/scripts/okf_manager.py` continua totalmente operacional e atua como wrapper redirecionando comandos para manter compatibilidade.
