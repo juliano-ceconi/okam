@@ -1,0 +1,58 @@
+#!/bin/sh
+# ⬡ Okam — Commit-msg Hook
+# Enforces Conventional Commits format on commit messages.
+# Part of the Okam governance framework. Install via: okam hooks install
+
+# ── Colors ──────────────────────────────────────────────────────────────────
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+COMMIT_MSG_FILE="$1"
+
+if [ ! -f "$COMMIT_MSG_FILE" ]; then
+    printf "${RED}⬡ Okam commit-msg: Arquivo de mensagem não encontrado.${RESET}\n"
+    exit 1
+fi
+
+# Read the first line (subject) of the commit message
+FIRST_LINE=$(head -n1 "$COMMIT_MSG_FILE")
+
+# Skip merge commits and fixup/squash commits
+case "$FIRST_LINE" in
+    Merge*|Revert*|fixup!*|squash!*|amend!*)
+        exit 0
+        ;;
+esac
+
+# Conventional Commits regex:
+# <type>[optional scope][optional !]: <description>
+# Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+PATTERN='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9._-]+\))?(!)?: .{1,}'
+
+if ! echo "$FIRST_LINE" | grep -qE "$PATTERN"; then
+    printf "\n${RED}${BOLD}⬡ Okam commit-msg: Mensagem fora do padrão Conventional Commits.${RESET}\n"
+    printf "${RED}  Recebido: ${FIRST_LINE}${RESET}\n"
+    printf "\n${YELLOW}  Formato esperado: <tipo>[escopo opcional]: <descrição>${RESET}\n"
+    printf "${YELLOW}  Tipos válidos: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert${RESET}\n"
+    printf "\n${YELLOW}  Exemplos:${RESET}\n"
+    printf "${GREEN}    feat: adiciona autenticação OAuth${RESET}\n"
+    printf "${GREEN}    fix(api): corrige timeout no endpoint de login${RESET}\n"
+    printf "${GREEN}    docs: atualiza README com instruções de deploy${RESET}\n"
+    printf "${GREEN}    feat!: breaking change na API de pagamentos${RESET}\n"
+    printf "\n${YELLOW}  Para bypass emergencial: git commit --no-verify${RESET}\n"
+    exit 1
+fi
+
+# Validate subject line length (soft warning at 72, hard fail at 100)
+SUBJECT_LEN=$(printf '%s' "$FIRST_LINE" | wc -c)
+if [ "$SUBJECT_LEN" -gt 100 ]; then
+    printf "${RED}${BOLD}⬡ Okam commit-msg: Linha de assunto muito longa (${SUBJECT_LEN} chars, max 100).${RESET}\n"
+    exit 1
+elif [ "$SUBJECT_LEN" -gt 72 ]; then
+    printf "${YELLOW}⬡ Okam commit-msg: Linha de assunto longa (${SUBJECT_LEN} chars, recomendado ≤72).${RESET}\n"
+fi
+
+exit 0

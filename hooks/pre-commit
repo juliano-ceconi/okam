@@ -1,0 +1,114 @@
+#!/bin/sh
+# ⬡ Okam — Pre-commit Hook
+# Validates OKF compliance for staged wiki files and detects leaked secrets.
+# Part of the Okam governance framework. Install via: okam hooks install
+
+set -e
+
+# ── Colors ──────────────────────────────────────────────────────────────────
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+ERRORS=0
+
+# ── 1. OKF Validation ──────────────────────────────────────────────────────
+# Find staged .md files in wiki directories
+WIKI_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '(knowledge/wiki|wiki)/.*\.md$' || true)
+
+if [ -n "$WIKI_FILES" ]; then
+    printf "${BLUE}${BOLD}⬡ Okam pre-commit: Validando conformidade OKF...${RESET}\n"
+
+    # Check if okam CLI is available
+    if command -v okam >/dev/null 2>&1; then
+        for file in $WIKI_FILES; do
+            # Validate the staged version by using the working copy
+            # (okam validate works on files in the filesystem)
+            WIKI_DIR=$(dirname "$file")
+            RESULT=$(okam validate --wiki-dir "$WIKI_DIR" 2>&1) || true
+
+            BASENAME=$(basename "$file")
+            if echo "$RESULT" | grep -q "\[FALHA\] $BASENAME"; then
+                printf "${RED}  ✗ ${BASENAME}${RESET}\n"
+                echo "$RESULT" | grep -A5 "\[FALHA\] $BASENAME" | grep "^    -" || true
+                ERRORS=$((ERRORS + 1))
+            else
+                printf "${GREEN}  ✓ ${BASENAME}${RESET}\n"
+            fi
+        done
+    else
+        printf "${YELLOW}  ⚠ okam CLI não encontrado. Pulando validação OKF.${RESET}\n"
+        printf "${YELLOW}    Instale com: pip install -e . (na raiz do projeto Okam)${RESET}\n"
+    fi
+fi
+
+# ── 2. Secret Detection ────────────────────────────────────────────────────
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM || true)
+
+if [ -n "$STAGED_FILES" ]; then
+    # Check for .env files being committed
+    ENV_FILES=$(echo "$STAGED_FILES" | grep -E '\.env($|\.)' | grep -v '\.env\.example$' || true)
+    if [ -n "$ENV_FILES" ]; then
+        printf "\n${RED}${BOLD}⬡ Okam pre-commit: Arquivos .env detectados!${RESET}\n"
+        for f in $ENV_FILES; do
+            printf "${RED}  ✗ ${f}${RESET}\n"
+        done
+        printf "${YELLOW}  → Adicione ao .gitignore ou use .env.example como template.${RESET}\n"
+        ERRORS=$((ERRORS + 1))
+    fi
+
+    # Scan staged content for secret patterns
+    SECRET_FOUND=0
+    for file in $STAGED_FILES; do
+        # Skip binary files and known safe extensions
+        case "$file" in
+            *.png|*.jpg|*.jpeg|*.gif|*.ico|*.woff|*.woff2|*.ttf|*.eot|*.svg|*.mp4|*.zip|*.tar|*.gz)
+                continue
+                ;;
+        esac
+
+        # Get staged content (not working copy)
+        CONTENT=$(git show ":$file" 2>/dev/null) || continue
+
+        # AWS Access Key IDs
+        if echo "$CONTENT" | grep -qE 'AKIA[0-9A-Z]{16}'; then
+            printf "${RED}  ✗ Possível AWS Key em: ${file}${RESET}\n"
+            SECRET_FOUND=1
+        fi
+
+        # OpenAI / Anthropic / Generic API keys
+        if echo "$CONTENT" | grep -qE '(sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9\-]{20,}|xoxb-[0-9]{10,})'; then
+            printf "${RED}  ✗ Possível API key/token em: ${file}${RESET}\n"
+            SECRET_FOUND=1
+        fi
+
+        # Generic secret assignments (password, secret, token with long values)
+        if echo "$CONTENT" | grep -qiE '(password|secret|token|api_key|apikey|private_key)\s*[=:]\s*["\x27][^\s"'\'']{12,}'; then
+            printf "${RED}  ✗ Possível segredo hardcoded em: ${file}${RESET}\n"
+            SECRET_FOUND=1
+        fi
+    done
+
+    if [ "$SECRET_FOUND" -eq 1 ]; then
+        printf "\n${RED}${BOLD}⬡ Okam pre-commit: Segredos detectados!${RESET}\n"
+        printf "${YELLOW}  → Remova os segredos e use variáveis de ambiente.${RESET}\n"
+        printf "${YELLOW}  → Para scan mais robusto, considere: https://github.com/gitleaks/gitleaks${RESET}\n"
+        ERRORS=$((ERRORS + 1))
+    fi
+fi
+
+# ── Result ──────────────────────────────────────────────────────────────────
+if [ "$ERRORS" -gt 0 ]; then
+    printf "\n${RED}${BOLD}⬡ Okam: Commit bloqueado — corrija os erros acima.${RESET}\n"
+    printf "${YELLOW}  Para bypass emergencial: git commit --no-verify${RESET}\n"
+    exit 1
+fi
+
+if [ -n "$WIKI_FILES" ]; then
+    printf "${GREEN}${BOLD}⬡ Okam: Todas as verificações passaram.${RESET}\n"
+fi
+
+exit 0

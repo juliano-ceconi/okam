@@ -1,0 +1,36 @@
+#!/bin/sh
+# ⬡ Okam — Pre-push Hook
+# Runs full OKF validation before pushing to remote.
+# Part of the Okam governance framework. Install via: okam hooks install
+
+set -e
+
+# ── Colors ──────────────────────────────────────────────────────────────────
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+printf "${BLUE}${BOLD}⬡ Okam pre-push: Executando validação OKF completa...${RESET}\n"
+
+# Check if okam CLI is available
+if ! command -v okam >/dev/null 2>&1; then
+    printf "${YELLOW}  ⚠ okam CLI não encontrado. Pulando validação OKF.${RESET}\n"
+    printf "${YELLOW}    Instale com: pip install -e . (na raiz do projeto Okam)${RESET}\n"
+    exit 0
+fi
+
+# Run full validation
+if okam validate >/dev/null 2>&1; then
+    printf "${GREEN}${BOLD}⬡ Okam pre-push: Validação OKF completa — tudo OK.${RESET}\n"
+    exit 0
+else
+    printf "\n${RED}${BOLD}⬡ Okam pre-push: Validação OKF falhou!${RESET}\n"
+    printf "${YELLOW}  Detalhes:${RESET}\n"
+    okam validate 2>&1 | grep -E '\[(FALHA|OK)\]' || okam validate 2>&1
+    printf "\n${YELLOW}  Corrija os erros antes de enviar ao remote.${RESET}\n"
+    printf "${YELLOW}  Para bypass emergencial: git push --no-verify${RESET}\n"
+    exit 1
+fi
