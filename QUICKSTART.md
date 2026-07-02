@@ -119,6 +119,22 @@ O comando `doctor` analisa seu ambiente para garantir que tudo está configurado
 okam doctor
 ```
 
+## 8. Catálogo de Skills Nativas
+
+O Okam já vem com um conjunto de skills prontas na pasta `.agents/skills/` para turbinar a produtividade e a governança dos seus agentes de IA:
+
+| Skill | Finalidade |
+|:---|:---|
+| `deep-metadata-analysis` | Extrai a "alma" do projeto mapeando sua stack e regras de negócio. |
+| `knowledge-wiki` | Auxilia na ingestão (ingest), consultas (query) e linting das páginas de conhecimento OKF. |
+| `memory-maintenance` | Eterniza lições aprendidas no fim das sessões de trabalho para futuras IAs. |
+| `guided-tour-creator` | Cria e atualiza o mapa `TOUR.md` de onboarding do projeto. |
+| `surgical-code-editor` | Ensina o agente a realizar alterações de baixo churn de forma localizada. |
+| `socratic-brainstorming` | Protocolo para esclarecer escopo e arquitetura com o usuário antes de codificar. |
+| `agentic-testing-companion` | Padrões de desenvolvimento orientado a testes (TDD) locais. |
+| `secret-leak-audit` | Varredura e higienização de chaves de API expostas em arquivos locais. |
+| `context-loop-manager` | Gestão de escopos de tarefas complexas rodando em múltiplos blocos isolados. |
+
 ## Próximos Passos
 
 - 📖 Leia a [documentação de conceitos](./docs/concepts/)

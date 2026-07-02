@@ -67,9 +67,14 @@ okam/
 ├── .agents/
 │   ├── rules/           # Padrões de governança
 │   ├── skills/          # Capacidades modulares
+│   │   ├── agentic-testing-companion/
+│   │   ├── context-loop-manager/
 │   │   ├── deep-metadata-analysis/
+│   │   ├── guided-tour-creator/
 │   │   ├── knowledge-wiki/
-│   │   └── memory-maintenance/
+│   │   ├── memory-maintenance/
+│   │   ├── secret-leak-audit/
+│   │   └── socratic-brainstorming/
 │   └── workflows/       # Pipelines de execução
 ├── hooks/               # Git hooks portáveis (POSIX sh)
 │   ├── pre-commit       # Validação OKF + detecção de segredos
@@ -94,6 +99,17 @@ okam/
 - **Python** — Validador OKF (zero dependências, stdlib only)
 - **Markdown** — Documentação e Wiki
 - **YAML** — Metadados estruturados
+
+## Landing Page
+
+A landing page está em `landing/` e faz deploy automático via **Vercel** a cada push no GitHub.
+
+**Setup único (já feito):**
+1. Importe o repo em [vercel.com/new](https://vercel.com/new)
+2. Root Directory: `03_Inteligencia/okam/landing`
+3. Deploy
+
+A partir daí, todo `git push` dispara deploy automático — sem ação manual.
 
 ## Contribuindo
 
