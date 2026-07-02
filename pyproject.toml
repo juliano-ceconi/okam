@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "okam"
-version = "0.3.0"
+version = "0.4.0"
 description = "Framework de governança de IA, memória persistente e gestão de conhecimento"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -24,4 +24,5 @@ okam = "okam.cli:main"
 
 [tool.hatch.build.targets.wheel.force-include]
 "hooks" = "okam/hooks"
+".agents/skills" = "okam/skills"
 

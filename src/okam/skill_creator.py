@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import shutil
 
 # Cores ANSI
 COLOR_GREEN = "\033[92m"
@@ -164,3 +165,85 @@ Adicione exemplos de prompt ou referências úteis de código aqui.
             
     print_colored(f"\n✅ Skill '{skill_name}' criada com sucesso na governança do workspace!", COLOR_GREEN + COLOR_BOLD)
     print_colored(f"Caminho: {target_skill_dir}\n", COLOR_BLUE)
+
+
+def _get_skills_source_dir():
+    """Retorna o diretório onde as skills nativas do Okam estão armazenadas."""
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # 1. Tenta o layout do wheel (pasta skills embutida dentro de okam/skills)
+    dist_skills_dir = os.path.join(package_dir, "skills")
+    if os.path.isdir(dist_skills_dir):
+        return dist_skills_dir
+
+    # 2. Tenta o layout do source code/modo dev (pasta .agents/skills está na raiz do repositório)
+    repo_dir = os.path.dirname(os.path.dirname(package_dir))
+    dev_skills_dir = os.path.join(repo_dir, ".agents", "skills")
+    if os.path.isdir(dev_skills_dir):
+        return dev_skills_dir
+
+    return None
+
+
+def install_native_skills(workspace_root=None, auto_yes=False):
+    """
+    Copia as skills nativas para a pasta .agents/skills do workspace de forma não-destrutiva.
+    """
+    if workspace_root is None:
+        workspace_root = find_workspace_root()
+
+    source_dir = _get_skills_source_dir()
+    if source_dir is None:
+        print_colored("Aviso: Catálogo de skills nativas não encontrado. Pulando instalação de skills nativas.", COLOR_YELLOW)
+        return False
+
+    agents_dir = os.path.join(workspace_root, ".agents")
+    target_skills_dir = os.path.join(agents_dir, "skills")
+    
+    os.makedirs(target_skills_dir, exist_ok=True)
+
+    print_colored("\nInstalando catálogo de skills nativas...", COLOR_BLUE)
+    
+    installed_count = 0
+    skipped_count = 0
+    
+    try:
+        skills = [d for d in os.listdir(source_dir) if os.path.isdir(os.path.join(source_dir, d)) and not d.startswith('.')]
+    except Exception as e:
+        print_colored(f"Erro ao listar skills nativas: {e}", COLOR_RED)
+        return False
+
+    for skill_name in skills:
+        src_skill_path = os.path.join(source_dir, skill_name)
+        dst_skill_path = os.path.join(target_skills_dir, skill_name)
+        
+        # Se a skill não existir no destino, copia integralmente
+        if not os.path.exists(dst_skill_path):
+            shutil.copytree(src_skill_path, dst_skill_path)
+            print_colored(f"  [INSTALADA] {skill_name}", COLOR_GREEN)
+            installed_count += 1
+        else:
+            # Se já existe, copia apenas os arquivos novos (não-destrutivo)
+            for root, dirs, files in os.walk(src_skill_path):
+                rel_path = os.path.relpath(root, src_skill_path)
+                dst_root = dst_skill_path if rel_path == "." else os.path.join(dst_skill_path, rel_path)
+                os.makedirs(dst_root, exist_ok=True)
+                
+                for file in files:
+                    src_file = os.path.join(root, file)
+                    dst_file = os.path.join(dst_root, file)
+                    
+                    if not os.path.exists(dst_file):
+                        shutil.copy2(src_file, dst_file)
+                        # Removemos o log excessivo para deixar mais limpo no cli
+                        installed_count += 1
+                    else:
+                        skipped_count += 1
+                        
+    if installed_count > 0:
+        print_colored(f"✅ {installed_count} novo(s) arquivo(s) de skill nativa instalado(s) em .agents/skills/", COLOR_GREEN + COLOR_BOLD)
+    else:
+        print_colored("✓ Catálogo de skills nativas já está atualizado no workspace.", COLOR_GREEN)
+        
+    return True
+

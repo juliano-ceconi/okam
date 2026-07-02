@@ -19,6 +19,8 @@ from okam.skill_creator import (
     COLOR_RED,
     COLOR_BLUE,
     COLOR_BOLD,
+    find_workspace_root,
+    install_native_skills,
 )
 from okam.hooks import (
     install_hooks,
@@ -169,6 +171,13 @@ Controlam como o conhecimento é criado, validado e mantido.
         created += 1
 
     print_colored(f"\n✅ {created} seed page(s) criada(s) em {wiki_dir}", COLOR_GREEN + COLOR_BOLD)
+
+    # Copiar catálogo de skills nativas
+    try:
+        workspace_root = find_workspace_root()
+        install_native_skills(workspace_root, auto_yes)
+    except Exception as e:
+        print_colored(f"Erro ao instalar skills nativas: {e}", COLOR_YELLOW)
 
     # Oferecer instalação de hooks (pular se chamado via setup com --yes)
     if not auto_yes:
