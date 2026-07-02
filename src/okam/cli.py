@@ -13,11 +13,18 @@ from okam.manager import (
 from okam.skill_creator import (
     create_new_skill,
     print_colored,
+    ask_question,
     COLOR_GREEN,
     COLOR_YELLOW,
     COLOR_RED,
     COLOR_BLUE,
     COLOR_BOLD,
+)
+from okam.hooks import (
+    install_hooks,
+    uninstall_hooks,
+    get_hooks_status,
+    HOOK_NAMES,
 )
 
 
@@ -162,6 +169,28 @@ Controlam como o conhecimento é criado, validado e mantido.
 
     print_colored(f"\n✅ {created} seed page(s) criada(s) em {wiki_dir}", COLOR_GREEN + COLOR_BOLD)
 
+    # Oferecer instalação de hooks
+    try:
+        resp = ask_question(
+            "Deseja instalar os Git hooks de governança?",
+            default="sim"
+        ).lower()
+        if resp in ['s', 'sim', 'y', 'yes']:
+            print_colored("\nInstalando hooks de governança...", COLOR_BLUE)
+            installed, skipped, errors = install_hooks()
+            if errors == 0:
+                print_colored(
+                    f"✅ {installed} hook(s) instalado(s).",
+                    COLOR_GREEN + COLOR_BOLD
+                )
+            else:
+                print_colored(
+                    f"⚠ {installed} instalado(s), {errors} erro(s).",
+                    COLOR_YELLOW
+                )
+    except (KeyboardInterrupt, EOFError):
+        pass  # Non-interactive ou cancelado — pular silenciosamente
+
 
 def cmd_validate(wiki_dir):
     """Valida todos os arquivos .md no wiki_dir contra o padrão OKF."""
@@ -218,6 +247,65 @@ def cmd_index(wiki_dir):
 
         print(f"| {filename} | {title} | {ftype} | {resource} | {timestamp} | {description} |")
 
+def cmd_hooks(args):
+    """Gerencia Git hooks de governança do Okam."""
+    action = getattr(args, "hooks_action", None)
+
+    if action is None:
+        print_colored("Uso: okam hooks {install|uninstall|status}", COLOR_YELLOW)
+        print_colored("  install    — Instala hooks de governança no repositório", COLOR_BLUE)
+        print_colored("  uninstall  — Remove hooks do Okam e restaura backups", COLOR_BLUE)
+        print_colored("  status     — Mostra o status de cada hook", COLOR_BLUE)
+        sys.exit(0)
+
+    if action == "install":
+        print_colored("⬡ Instalando hooks de governança...\n", COLOR_BLUE + COLOR_BOLD)
+        skip = []
+        if getattr(args, "skip_commit_msg", False):
+            skip.append("commit-msg")
+        installed, skipped, errors = install_hooks(skip_hooks=skip)
+        print()
+        if errors == 0:
+            print_colored(
+                f"✅ {installed} hook(s) instalado(s), {skipped} pulado(s).",
+                COLOR_GREEN + COLOR_BOLD,
+            )
+        else:
+            print_colored(
+                f"⚠ {installed} instalado(s), {errors} erro(s).",
+                COLOR_RED + COLOR_BOLD,
+            )
+            sys.exit(1)
+
+    elif action == "uninstall":
+        print_colored("⬡ Removendo hooks de governança...\n", COLOR_BLUE + COLOR_BOLD)
+        removed, restored, not_found = uninstall_hooks()
+        print()
+        total = removed + restored
+        if total > 0:
+            print_colored(
+                f"✅ {total} hook(s) removido(s) ({restored} backup(s) restaurado(s)).",
+                COLOR_GREEN + COLOR_BOLD,
+            )
+        else:
+            print_colored("Nenhum hook do Okam encontrado para remover.", COLOR_YELLOW)
+
+    elif action == "status":
+        print_colored("⬡ Status dos hooks de governança:\n", COLOR_BLUE + COLOR_BOLD)
+        status = get_hooks_status()
+        for hook_name, state in status.items():
+            if "Okam" in state:
+                color = COLOR_GREEN
+                icon = "✓"
+            elif "externo" in state:
+                color = COLOR_YELLOW
+                icon = "~"
+            else:
+                color = COLOR_RED
+                icon = "✗"
+            print_colored(f"  {icon} {hook_name}: {state}", color)
+        print()
+
 
 def main():
     # Configura encoding UTF-8 para Windows se executado diretamente
@@ -257,6 +345,20 @@ def main():
     # Comando new-skill
     subparsers.add_parser("new-skill", help="Cria interativamente uma nova skill na pasta .agents/skills")
 
+    # Comando hooks
+    p_hooks = subparsers.add_parser("hooks", help="Gerencia Git hooks de governança")
+    p_hooks_sub = p_hooks.add_subparsers(dest="hooks_action", help="Ação dos hooks")
+
+    p_hooks_install = p_hooks_sub.add_parser("install", help="Instala hooks de governança no repositório")
+    p_hooks_install.add_argument(
+        "--skip-commit-msg",
+        action="store_true",
+        help="Não instalar o hook de Conventional Commits"
+    )
+
+    p_hooks_sub.add_parser("uninstall", help="Remove hooks do Okam e restaura backups")
+    p_hooks_sub.add_parser("status", help="Mostra o status de cada hook de governança")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -282,6 +384,8 @@ def main():
         cmd_index(wiki_dir)
     elif args.command == "new-skill":
         create_new_skill()
+    elif args.command == "hooks":
+        cmd_hooks(args)
 
 
 if __name__ == "__main__":

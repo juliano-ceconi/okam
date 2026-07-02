@@ -38,7 +38,7 @@ def _get_hooks_source_dir():
 
     # Fallback: relativo ao pacote Python instalado
     package_dir = os.path.dirname(os.path.abspath(__file__))
-    hooks_dir = os.path.join(os.path.dirname(package_dir), "hooks")
+    hooks_dir = os.path.join(package_dir, "hooks")
     if os.path.isdir(hooks_dir):
         return hooks_dir
 

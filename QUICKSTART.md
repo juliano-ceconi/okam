@@ -63,12 +63,39 @@ okam validate
 okam index
 ```
 
+## 6. Instale os Git Hooks de Governança
+
+O Okam inclui hooks que validam automaticamente antes de cada commit e push:
+
+| Hook | O que faz |
+|:---|:---|
+| `pre-commit` | Valida OKF dos arquivos staged + detecta segredos vazados |
+| `commit-msg` | Garante o formato [Conventional Commits](https://www.conventionalcommits.org/) |
+| `pre-push` | Re-valida OKF completo antes de enviar ao remote |
+
+```bash
+# Instalar todos os hooks
+okam hooks install
+
+# Instalar sem o hook de Conventional Commits
+okam hooks install --skip-commit-msg
+
+# Ver status
+okam hooks status
+
+# Remover (restaura backups de hooks anteriores)
+okam hooks uninstall
+```
+
+> **Nota:** Os hooks são scripts shell portáveis (POSIX `sh`) com zero dependências externas. No Windows, rodam automaticamente via Git Bash. Para bypass emergencial, use `--no-verify` (ex: `git commit --no-verify`).
+
 ## Próximos Passos
 
 - 📖 Leia a [documentação de conceitos](./docs/concepts/)
 - 🧩 Explore as [skills incluídas](./.agents/skills/)
 - 📚 Adicione conhecimento ao [wiki](./knowledge/wiki/)
 - 🏗️ Crie um [TOUR.md](./templates/tour-template.md) para seu projeto
+- 🔒 Instale os [Git hooks de governança](#6-instale-os-git-hooks-de-governança)
 
 ---
 

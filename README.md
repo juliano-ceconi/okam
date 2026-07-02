@@ -60,6 +60,7 @@ Para o guia completo, veja o [QUICKSTART.md](./QUICKSTART.md).
 | **OKF** | Formato padronizado de metadados para conhecimento | [docs/concepts/okf-format.md](./docs/concepts/okf-format.md) |
 | **Deep Metadata** | Pipeline de 4 fases para extrair contexto | [docs/concepts/deep-metadata.md](./docs/concepts/deep-metadata.md) |
 | **Guided Tours** | Padrão TOUR.md para onboarding de agentes | [docs/concepts/guided-tours.md](./docs/concepts/guided-tours.md) |
+| **Git Hooks** | Governança automatizada via hooks pre-commit/push | [docs/concepts/git-hooks.md](./docs/concepts/git-hooks.md) |
 
 ## Estrutura do Projeto
 
@@ -72,6 +73,10 @@ okam/
 │   │   ├── knowledge-wiki/
 │   │   └── memory-maintenance/
 │   └── workflows/       # Pipelines de execução
+├── hooks/               # Git hooks portáveis (POSIX sh)
+│   ├── pre-commit       # Validação OKF + detecção de segredos
+│   ├── commit-msg       # Conventional Commits
+│   └── pre-push         # Validação OKF completa
 ├── knowledge/
 │   ├── wiki/            # Páginas de síntese (OKF)
 │   ├── raw-sources/     # Fontes brutas
@@ -96,9 +101,10 @@ okam/
 
 1. Fork o repositório
 2. Crie uma branch para sua feature (`git checkout -b feat/minha-feature`)
-3. Commit suas mudanças (`git commit -m 'feat: adiciona minha feature'`)
-4. Push para a branch (`git push origin feat/minha-feature`)
-5. Abra um Pull Request
+3. Instale os hooks de governança (`okam hooks install`)
+4. Commit suas mudanças (`git commit -m 'feat: adiciona minha feature'`)
+5. Push para a branch (`git push origin feat/minha-feature`)
+6. Abra um Pull Request
 
 ## Licença
 
