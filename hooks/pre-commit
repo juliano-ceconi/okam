@@ -24,21 +24,13 @@ if [ -n "$WIKI_FILES" ]; then
 
     # Check if okam CLI is available
     if command -v okam >/dev/null 2>&1; then
-        for file in $WIKI_FILES; do
-            # Validate the staged version by using the working copy
-            # (okam validate works on files in the filesystem)
-            WIKI_DIR=$(dirname "$file")
-            RESULT=$(okam validate --wiki-dir "$WIKI_DIR" 2>&1) || true
+        # Valida apenas os arquivos staged individuais de uma vez
+        RESULT=$(okam validate $WIKI_FILES 2>&1) || true
+        echo "$RESULT"
 
-            BASENAME=$(basename "$file")
-            if echo "$RESULT" | grep -q "\[FALHA\] $BASENAME"; then
-                printf "${RED}  ✗ ${BASENAME}${RESET}\n"
-                echo "$RESULT" | grep -A5 "\[FALHA\] $BASENAME" | grep "^    -" || true
-                ERRORS=$((ERRORS + 1))
-            else
-                printf "${GREEN}  ✓ ${BASENAME}${RESET}\n"
-            fi
-        done
+        if echo "$RESULT" | grep -q "\[FALHA\]"; then
+            ERRORS=$((ERRORS + 1))
+        fi
     else
         printf "${YELLOW}  ⚠ okam CLI não encontrado. Pulando validação OKF.${RESET}\n"
         printf "${YELLOW}    Instale com: pip install okam${RESET}\n"

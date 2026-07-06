@@ -68,13 +68,15 @@ okam/
 │   ├── rules/           # Padrões de governança
 │   ├── skills/          # Capacidades modulares
 │   │   ├── agentic-testing-companion/
+│   │   ├── checklists/
 │   │   ├── context-loop-manager/
 │   │   ├── deep-metadata-analysis/
 │   │   ├── guided-tour-creator/
 │   │   ├── knowledge-wiki/
 │   │   ├── memory-maintenance/
 │   │   ├── secret-leak-audit/
-│   │   └── socratic-brainstorming/
+│   │   ├── socratic-brainstorming/
+│   │   └── surgical-code-editor/
 │   └── workflows/       # Pipelines de execução
 ├── hooks/               # Git hooks portáveis (POSIX sh)
 │   ├── pre-commit       # Validação OKF + detecção de segredos

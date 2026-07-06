@@ -112,6 +112,59 @@ def extract_h1(body):
     return match.group(1).strip() if match else ""
 
 
+def clean_markdown_title(title):
+    """Remove marcações markdown básicas do título (negrito, itálicos, símbolos comuns) e espaços extras."""
+    if not title:
+        return ""
+    # Remove negrito/itálico, crases e outros caracteres de formatação
+    title = re.sub(r'[*_`~]', '', title)
+    title = re.sub(r'^[⬡\s\-•]+', '', title) # Remove símbolos comuns de início de título
+    return " ".join(title.split()).strip()
+
+
+def validate_wiki_links(filepath, body):
+    """Valida se os wiki-links contidos no corpo apontam para arquivos existentes."""
+    errors = []
+    # Encontra [[wiki-link]] ou [[wiki-link|Texto]]
+    links = re.findall(r'\[\[([^\]|]+)(?:\|[^\]]*)?\]\]', body)
+    
+    if not links:
+        return errors
+        
+    wiki_dir = os.path.dirname(filepath)
+    # Procuramos também subir para achar a raiz do wiki (onde index.md reside)
+    current = wiki_dir
+    wiki_root = wiki_dir
+    while current and current != os.path.dirname(current):
+        if os.path.exists(os.path.join(current, "index.md")):
+            wiki_root = current
+            break
+        current = os.path.dirname(current)
+        
+    # Listamos todos os nomes de arquivos .md (sem extensão) válidos na wiki
+    all_pages = set()
+    for root, _, filenames in os.walk(wiki_root):
+        for f in filenames:
+            if f.endswith('.md'):
+                name_without_ext = os.path.splitext(f)[0]
+                all_pages.add(name_without_ext)
+                
+    for link in links:
+        link_target = link.strip().lower()
+        if link_target == "root":
+            continue
+        # Se for link no formato [[nome-arquivo]], limpamos
+        if link_target.startswith('[[') and link_target.endswith(']]'):
+            link_target = link_target[2:-2].strip()
+        link_target = link_target.replace('[[', '').replace(']]', '')
+        
+        # Verifica se o arquivo existe na lista de páginas válidas
+        if link_target not in [p.lower() for p in all_pages]:
+            errors.append(f"Wiki-link quebrado: [[{link}]] (página não encontrada)")
+            
+    return errors
+
+
 def validate_file(filepath):
     """Valida um arquivo contra o padrão OKF. Retorna (is_valid, errors)."""
     try:
@@ -139,8 +192,15 @@ def validate_file(filepath):
 
     if 'title' in frontmatter and body:
         expected_title = extract_h1(body)
-        if expected_title and frontmatter['title'] != expected_title:
-            errors.append(f"Título no frontmatter ('{frontmatter['title']}') difere do H1 ('{expected_title}')")
+        if expected_title:
+            clean_fm_title = clean_markdown_title(frontmatter['title'])
+            clean_h1_title = clean_markdown_title(expected_title)
+            if clean_fm_title.lower() != clean_h1_title.lower():
+                errors.append(f"Título no frontmatter ('{frontmatter['title']}') difere do H1 ('{expected_title}')")
+
+    if body:
+        link_errors = validate_wiki_links(filepath, body)
+        errors.extend(link_errors)
 
     return len(errors) == 0, errors
 
@@ -153,3 +213,34 @@ def get_wiki_files(wiki_dir):
             if f.endswith('.md'):
                 files.append(os.path.join(root, f))
     return sorted(files)
+
+
+def calculate_inbound_links(wiki_dir):
+    """Calcula a contagem de links de entrada de cada página da wiki.
+    Retorna um dicionário {nome_pagina: contagem} com o case original do nome do arquivo (sem .md).
+    """
+    files = get_wiki_files(wiki_dir)
+    inbound_counts = {}
+    lower_to_original = {}
+    for filepath in files:
+        name = os.path.splitext(os.path.basename(filepath))[0]
+        inbound_counts[name] = 0
+        lower_to_original[name.lower()] = name
+
+    for filepath in files:
+        try:
+            _, body = load_markdown_file(filepath)
+            links = re.findall(r'\[\[([^\]|]+)(?:\|[^\]]*)?\]\]', body)
+            for link in links:
+                link_target = link.strip().lower()
+                if link_target.startswith('[[') and link_target.endswith(']]'):
+                    link_target = link_target[2:-2].strip()
+                link_target = link_target.replace('[[', '').replace(']]', '')
+
+                if link_target in lower_to_original:
+                    orig_name = lower_to_original[link_target]
+                    inbound_counts[orig_name] += 1
+        except Exception:
+            continue
+    return inbound_counts
+
