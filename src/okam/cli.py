@@ -179,6 +179,13 @@ Controlam como o conhecimento é criado, validado e mantido.
     except Exception as e:
         print_colored(f"Erro ao instalar skills nativas: {e}", COLOR_YELLOW)
 
+    # Configurar regras nativas para IDEs de IA (Cursor, Claude Code, Copilot, etc.)
+    try:
+        workspace_root = find_workspace_root()
+        _generate_ide_rules(workspace_root)
+    except Exception as e:
+        print_colored(f"Erro ao gerar regras nativas para IDEs: {e}", COLOR_YELLOW)
+
     # Oferecer instalação de hooks (pular se chamado via setup com --yes)
     if not auto_yes:
         try:
@@ -190,6 +197,101 @@ Controlam como o conhecimento é criado, validado e mantido.
                 _install_hooks_with_feedback()
         except (KeyboardInterrupt, EOFError):
             pass  # Non-interactive ou cancelado — pular silenciosamente
+
+
+def _generate_ide_rules(workspace_root):
+    """Gera arquivos de configuração e regras nativas para IDEs de IA na raiz do workspace."""
+    print_colored("\nConfigurando regras nativas para IDEs de IA...", COLOR_BLUE)
+
+    # 1. AGENTS.md
+    agents_path = os.path.join(workspace_root, "AGENTS.md")
+    agents_content = """# 🏛️ Governança de Agentes de IA
+
+Este arquivo define as regras operacionais para todos os Agentes de IA que atuam neste Workspace. Nosso objetivo é obter soluções corretas, seguras e com baixo churn de código.
+
+## Pipeline de Inteligência (Core Agent Pipeline)
+
+Antes de fazer alterações complexas ou que afetem múltiplos arquivos:
+1. **Scanner:** Mapeie o repositório, identifique dependências e a arquitetura existente.
+2. **Relational:** Compreenda as regras de negócio e conexões entre componentes.
+3. **Governance:** Valide as regras de conformidade e certifique-se de que não há vazamento de chaves ou credenciais.
+4. **Synthesis:** Eternize o aprendizado na Wiki local (`knowledge/wiki/`) e garanta que está tudo em conformidade com o formato OKF.
+
+## Convenções e Regras de Ouro
+
+- **Slow is Fast:** Prefira soluções simples, modulares e de fácil manutenção sobre arquiteturas complexas.
+- **Surgical Changes:** Evite reescrever arquivos inteiros se puder realizar alterações cirúrgicas e localizadas.
+- **Wiki de Conhecimento:** Use `knowledge/wiki/` como memória persistente de longo prazo. Sempre que aprender uma lição relevante sobre este projeto, crie ou atualize uma página de conhecimento em formato OKF.
+- **Hooks de Validação:** Execute `okam validate` antes de enviar mudanças importantes.
+"""
+    if not os.path.exists(agents_path):
+        with open(agents_path, 'w', encoding='utf-8') as f:
+            f.write(agents_content)
+        print_colored("  [CRIADO] AGENTS.md (Antigravity IDE & Codex)", COLOR_GREEN)
+    else:
+        print_colored("  [EXISTE] AGENTS.md — pulando", COLOR_YELLOW)
+
+    # 2. .cursorrules (Cursor & OpenCode)
+    cursorrules_path = os.path.join(workspace_root, ".cursorrules")
+    cursorrules_content = """# Okam Rules for Cursor & OpenCode
+
+You are an AI assistant helping with this codebase.
+This project uses Okam for AI governance and persistent memory.
+
+Before starting any task:
+1. READ and STRICTLY FOLLOW the guidelines in [AGENTS.md](file:///d:/projetos/juliano-ceconi/AGENTS.md) at the project root.
+2. UTILIZE the modular skills defined in the `.agents/skills/` directory when relevant.
+3. REFER to and update the persistent memory wiki in `knowledge/wiki/` (format OKF).
+
+Coding standards:
+- Make small, incremental, and surgical changes.
+- Prioritize simplicity (YAGNI > KISS > DRY).
+- Verify changes using existing test suites or code validation tools.
+"""
+    if not os.path.exists(cursorrules_path):
+        with open(cursorrules_path, 'w', encoding='utf-8') as f:
+            f.write(cursorrules_content)
+        print_colored("  [CRIADO] .cursorrules (Cursor & OpenCode)", COLOR_GREEN)
+    else:
+        print_colored("  [EXISTE] .cursorrules — pulando", COLOR_YELLOW)
+
+    # 3. .github/copilot-instructions.md (VS Code Copilot)
+    github_dir = os.path.join(workspace_root, ".github")
+    copilot_path = os.path.join(github_dir, "copilot-instructions.md")
+    copilot_content = """# Okam Rules for GitHub Copilot / VS Code Copilot
+
+This project uses Okam for AI governance and persistent memory.
+
+Please comply with the following instructions:
+1. Read the central governance standards in [AGENTS.md](file:///d:/projetos/juliano-ceconi/AGENTS.md).
+2. Follow the modular workflow skills defined in `.agents/skills/`.
+3. Check and update the project knowledge wiki located at `knowledge/wiki/`.
+
+Coding standard:
+- Implement surgical, localized changes to minimize code churn.
+- Maintain documentation integrity and preserve existing comments.
+"""
+    if not os.path.exists(copilot_path):
+        os.makedirs(github_dir, exist_ok=True)
+        with open(copilot_path, 'w', encoding='utf-8') as f:
+            f.write(copilot_content)
+        print_colored("  [CRIADO] .github/copilot-instructions.md (VS Code Copilot)", COLOR_GREEN)
+    else:
+        print_colored("  [EXISTE] .github/copilot-instructions.md — pulando", COLOR_YELLOW)
+
+    # 4. .claudecode.json (Claude Code)
+    claudecode_path = os.path.join(workspace_root, ".claudecode.json")
+    claudecode_content = """{
+  "customInstructions": "This project is governed by Okam. Read and strictly follow the rules in AGENTS.md, use the skills defined in .agents/skills/, and access/update the persistent knowledge wiki in knowledge/wiki/."
+}
+"""
+    if not os.path.exists(claudecode_path):
+        with open(claudecode_path, 'w', encoding='utf-8') as f:
+            f.write(claudecode_content)
+        print_colored("  [CRIADO] .claudecode.json (Claude Code)", COLOR_GREEN)
+    else:
+        print_colored("  [EXISTE] .claudecode.json — pulando", COLOR_YELLOW)
+
 
 
 def _install_hooks_with_feedback(skip=None):
@@ -208,18 +310,27 @@ def _install_hooks_with_feedback(skip=None):
         )
 
 
-def cmd_validate(wiki_dir):
-    """Valida todos os arquivos .md no wiki_dir contra o padrão OKF."""
-    files = get_wiki_files(wiki_dir)
+def cmd_validate(wiki_dir, files=None):
+    """Valida conformidade OKF de arquivos Markdown específicos ou em todo o wiki_dir."""
+    if files:
+        files_to_validate = [os.path.abspath(f) for f in files if os.path.isfile(f)]
+    else:
+        files_to_validate = get_wiki_files(wiki_dir)
 
-    if not files:
-        print_colored(f"Nenhum arquivo .md encontrado em: {wiki_dir}", COLOR_YELLOW)
+    if not files_to_validate:
+        if files:
+            print_colored("Nenhum arquivo válido especificado para validação.", COLOR_YELLOW)
+        else:
+            print_colored(f"Nenhum arquivo .md encontrado em: {wiki_dir}", COLOR_YELLOW)
         return True
 
     all_ok = True
-    print_colored(f"Validando conformidade OKF em: {wiki_dir}...\n", COLOR_BLUE)
+    if files:
+        print_colored(f"Validando {len(files_to_validate)} arquivo(s) específico(s)...\n", COLOR_BLUE)
+    else:
+        print_colored(f"Validando conformidade OKF em: {wiki_dir}...\n", COLOR_BLUE)
 
-    for filepath in files:
+    for filepath in files_to_validate:
         filename = os.path.basename(filepath)
         is_ok, errors = validate_file(filepath)
         if is_ok:
@@ -349,6 +460,7 @@ def main():
     # Comando validate
     p_val = subparsers.add_parser("validate", help="Valida conformidade OKF de arquivos Markdown")
     p_val.add_argument("--wiki-dir", help="Diretório do wiki a validar (default: autodetect ./knowledge/wiki)")
+    p_val.add_argument("files", nargs="*", help="Arquivos específicos para validar")
 
     # Comando index
     p_idx = subparsers.add_parser("index", help="Gera tabela Markdown do índice de conhecimento")
@@ -408,7 +520,7 @@ def main():
     if args.command == "init":
         cmd_init(wiki_dir)
     elif args.command == "validate":
-        success = cmd_validate(wiki_dir)
+        success = cmd_validate(wiki_dir, getattr(args, "files", []))
         sys.exit(0 if success else 1)
     elif args.command in ["index", "dump-index"]:
         if not os.path.exists(wiki_dir):

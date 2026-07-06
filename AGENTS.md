@@ -1,4 +1,4 @@
-# 🏛️ Governança de Agentes
+# Governança de Agentes
 
 Este documento define a arquitetura operacional de todos os Agentes de IA neste workspace. Objetivo: **Entendimento Holístico e Execução de Baixo Churn**.
 

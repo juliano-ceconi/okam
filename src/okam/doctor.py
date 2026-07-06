@@ -9,6 +9,7 @@ import os
 import shutil
 import subprocess
 import sys
+from datetime import datetime
 
 from okam.skill_creator import (
     print_colored,
@@ -72,6 +73,65 @@ def _check_wiki(workspace):
 def _check_agents_md(workspace):
     """Verifica se AGENTS.md existe na raiz."""
     return os.path.isfile(os.path.join(workspace, "AGENTS.md"))
+
+
+def _check_cursorrules(workspace):
+    """Verifica se .cursorrules (Cursor/OpenCode) existe na raiz."""
+    return os.path.isfile(os.path.join(workspace, ".cursorrules"))
+
+
+def _check_copilot_instructions(workspace):
+    """Verifica se .github/copilot-instructions.md (VS Code Copilot) existe."""
+    return os.path.isfile(os.path.join(workspace, ".github", "copilot-instructions.md"))
+
+
+def _check_claudecode_config(workspace):
+    """Verifica se .claudecode.json (Claude Code) existe na raiz."""
+    return os.path.isfile(os.path.join(workspace, ".claudecode.json"))
+
+
+
+def _check_stale_pages(workspace):
+    """Verifica se há páginas da wiki fora do limite de staleness dinâmico."""
+    wiki_dir = os.path.join(workspace, "knowledge", "wiki")
+    if not os.path.isdir(wiki_dir):
+        wiki_dir = os.path.join(workspace, "wiki")
+    if not os.path.isdir(wiki_dir):
+        return False, 0, []
+
+    from okam.manager import get_wiki_files, load_markdown_file, calculate_inbound_links
+    files = get_wiki_files(wiki_dir)
+    inbound_counts = calculate_inbound_links(wiki_dir)
+    stale_files = []
+    today = datetime.now()
+
+    for filepath in files:
+        try:
+            frontmatter, _ = load_markdown_file(filepath)
+            if not frontmatter or 'timestamp' not in frontmatter:
+                continue
+            ts_str = str(frontmatter['timestamp'])
+            ts = datetime.strptime(ts_str, "%Y-%m-%d")
+            delta_days = (today - ts).days
+
+            page_name = os.path.splitext(os.path.basename(filepath))[0]
+            num_links = inbound_counts.get(page_name, 0)
+
+            if num_links == 0:
+                threshold = 90
+            elif num_links <= 2:
+                threshold = 180
+            else:
+                threshold = 360
+
+            if delta_days > threshold:
+                rel_path = os.path.relpath(filepath, workspace)
+                stale_files.append((rel_path, delta_days, threshold, num_links))
+        except Exception:
+            continue
+
+    stale_files.sort(key=lambda x: x[1], reverse=True)
+    return True, len(stale_files), stale_files
 
 
 def run_doctor():
@@ -159,14 +219,55 @@ def run_doctor():
     # 6. AGENTS.md
     agents_ok = _check_agents_md(workspace)
     if agents_ok:
-        print_colored("  ✓ AGENTS.md presente na raiz", COLOR_GREEN)
+        print_colored("  ✓ AGENTS.md presente na raiz (Antigravity IDE & Codex)", COLOR_GREEN)
         passed += 1
     else:
         print_colored(
-            "  ~ AGENTS.md não encontrado (opcional, mas recomendado)",
+            "  ~ AGENTS.md não encontrado (opcional, mas recomendado para Antigravity IDE & Codex)",
             COLOR_YELLOW,
         )
         warnings += 1
+
+    # 6.1. .cursorrules (Cursor & OpenCode)
+    cursor_ok = _check_cursorrules(workspace)
+    if cursor_ok:
+        print_colored("  ✓ .cursorrules presente na raiz (Cursor & OpenCode)", COLOR_GREEN)
+        passed += 1
+    else:
+        print_colored("  ~ .cursorrules não encontrado (opcional, mas recomendado para Cursor & OpenCode)", COLOR_YELLOW)
+        warnings += 1
+
+    # 6.2. .github/copilot-instructions.md (VS Code Copilot)
+    copilot_ok = _check_copilot_instructions(workspace)
+    if copilot_ok:
+        print_colored("  ✓ .github/copilot-instructions.md presente (VS Code Copilot)", COLOR_GREEN)
+        passed += 1
+    else:
+        print_colored("  ~ .github/copilot-instructions.md não encontrado (opcional, mas recomendado para VS Code Copilot)", COLOR_YELLOW)
+        warnings += 1
+
+    # 6.3. .claudecode.json (Claude Code)
+    claude_ok = _check_claudecode_config(workspace)
+    if claude_ok:
+        print_colored("  ✓ .claudecode.json presente na raiz (Claude Code)", COLOR_GREEN)
+        passed += 1
+    else:
+        print_colored("  ~ .claudecode.json não encontrado (opcional, mas recomendado para Claude Code)", COLOR_YELLOW)
+        warnings += 1
+
+    # 7. Obsolescência de Conhecimento
+    stale_ok, stale_count, stale_details = _check_stale_pages(workspace)
+    if stale_ok:
+        if stale_count > 0:
+            print_colored(f"  ~ Obsolescência: {stale_count} página(s) fora do limite dinâmico de atualização", COLOR_YELLOW)
+            for file, age, threshold, links in stale_details[:5]:
+                print_colored(f"      - {file} ({age} dias atrás, limite: {threshold} dias, links: {links})", COLOR_YELLOW)
+            if stale_count > 5:
+                print_colored(f"      - e mais {stale_count - 5} página(s)...", COLOR_YELLOW)
+            warnings += 1
+        else:
+            print_colored("  ✓ Todas as páginas atualizadas de acordo com o limite dinâmico", COLOR_GREEN)
+            passed += 1
 
     # Sumário
     print()
