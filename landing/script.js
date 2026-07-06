@@ -71,13 +71,59 @@
         animationId = requestAnimationFrame(drawParticles);
     }
 
+    // --- Graph Connections Drawer ---
+    function drawGraphConnections() {
+        const diagram = document.querySelector('.decay-diagram');
+        if (!diagram) return;
+
+        const svg = diagram.querySelector('.graph-connections');
+        if (!svg) return;
+
+        const hub = diagram.querySelector('.node-hub');
+        const connected = diagram.querySelector('.node-connected');
+
+        if (!hub || !connected) return;
+
+        const line = svg.querySelector('.line-main');
+        if (line) {
+            const x1 = connected.offsetLeft + connected.offsetWidth / 2;
+            const y1 = connected.offsetTop + connected.offsetHeight / 2;
+            const x2 = hub.offsetLeft + hub.offsetWidth / 2;
+            const y2 = hub.offsetTop + hub.offsetHeight / 2;
+
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+        }
+
+        // Linhas de conexões decorativas/simuladas do hub para fora
+        const mockLines = svg.querySelectorAll('.line-mock');
+        if (mockLines.length >= 2) {
+            const xHub = hub.offsetLeft + hub.offsetWidth / 2;
+            const yHub = hub.offsetTop + hub.offsetHeight / 2;
+
+            mockLines[0].setAttribute('x1', xHub);
+            mockLines[0].setAttribute('y1', yHub);
+            mockLines[0].setAttribute('x2', xHub + 110);
+            mockLines[0].setAttribute('y2', yHub - 60);
+
+            mockLines[1].setAttribute('x1', xHub);
+            mockLines[1].setAttribute('y1', yHub);
+            mockLines[1].setAttribute('x2', xHub + 80);
+            mockLines[1].setAttribute('y2', yHub + 90);
+        }
+    }
+
     resizeCanvas();
     createParticles();
     drawParticles();
+    drawGraphConnections();
 
     window.addEventListener('resize', () => {
         resizeCanvas();
         createParticles();
+        drawGraphConnections();
     });
 
     // --- Mobile Nav Toggle ---
@@ -101,7 +147,8 @@
     const revealElements = document.querySelectorAll(
         '.section-label, .section-title, .section-description, ' +
         '.pain-card, .approach-comparison, .component-card, ' +
-        '.terminal, .cta-title, .cta-subtitle, .cta-actions'
+        '.terminal, .cta-title, .cta-subtitle, .cta-actions, ' +
+        '.decay-rule, .decay-diagram'
     );
 
     revealElements.forEach(el => {

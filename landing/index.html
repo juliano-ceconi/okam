@@ -26,6 +26,7 @@
         <div class="nav-links">
             <a href="#problema">O Problema</a>
             <a href="#abordagem">Abordagem</a>
+            <a href="#decay">Decaimento</a>
             <a href="#componentes">Componentes</a>
             <a href="#quickstart">Quick Start</a>
             <a href="https://github.com/juliano-ceconi/okam" class="nav-cta" target="_blank" rel="noopener">GitHub →</a>
@@ -44,8 +45,8 @@
                 Comece a <span class="text-gradient">Governar.</span>
             </h1>
             <p class="hero-subtitle">
-                Framework open-source para governança de IA, memória persistente
-                e gestão de conhecimento — feito por devs, para devs.
+                Framework open-source de governança de IA e memória persistente — 
+                para qualquer nível, de aprendizes de vibe-coding a programadores experientes.
             </p>
             <div class="hero-actions">
                 <a href="#quickstart" class="btn btn-primary">Começar em 5 min</a>
@@ -56,7 +57,7 @@
             </div>
             <div class="hero-stats">
                 <div class="stat">
-                    <span class="stat-value">3</span>
+                    <span class="stat-value">10</span>
                     <span class="stat-label">Skills Core</span>
                 </div>
                 <div class="stat-divider"></div>
@@ -79,9 +80,7 @@
             <span class="section-label">O Problema</span>
             <h2 class="section-title">Seus agentes têm <span class="text-gradient">amnésia.</span></h2>
             <p class="section-description">
-                Toda vez que você abre uma nova sessão com seu copilot, ele começa do zero.
-                Sem memória do que já foi discutido. Sem contexto das decisões passadas.
-                Sem governança sobre o que pode ou não fazer.
+                Não importa se você é um aprendiz de vibe-coding criando seu primeiro app ou um programador experiente estruturando microsserviços: quando o chat da IA fecha, o contexto morre. Okam resolve isso trazendo governança agnóstica e memória persistente ao seu repositório.
             </p>
             <div class="pain-grid">
                 <div class="pain-card">
@@ -133,6 +132,72 @@
         </div>
     </section>
 
+    <!-- GRAPH-DRIVEN DECAY -->
+    <section class="section" id="decay">
+        <div class="container">
+            <span class="section-label">Obsolescência Dinâmica</span>
+            <h2 class="section-title">Decaimento Orientado a <span class="text-gradient">Grafo</span></h2>
+            <p class="section-description">
+                Chega de alertas de documentação desatualizada para páginas estáveis.
+                O Okam calcula o limite de expiração baseado em <strong>inbound links</strong> (conexões de entrada na wiki),
+                dando maior tolerância a hubs centrais e limpando páginas órfãs rapidamente.
+            </p>
+            <div class="decay-showcase">
+                <div class="decay-details">
+                    <div class="decay-rule" data-delay="0">
+                        <div class="rule-icon orphan">●</div>
+                        <div class="rule-info">
+                            <h4>Páginas Órfãs (0 conexões)</h4>
+                            <p>Limite estrito de <strong>90 dias</strong>. Se não está integrada na rede, expira rápido para manter a base limpa.</p>
+                        </div>
+                    </div>
+                    <div class="decay-rule" data-delay="100">
+                        <div class="rule-icon connected">⬡</div>
+                        <div class="rule-info">
+                            <h4>Páginas Conectadas (1-2 conexões)</h4>
+                            <p>Tolerância média de <strong>180 dias</strong>. Páginas de referência intermediária com ciclo de vida moderado.</p>
+                        </div>
+                    </div>
+                    <div class="decay-rule" data-delay="200">
+                        <div class="rule-icon central">⬢</div>
+                        <div class="rule-info">
+                            <h4>Hubs Centrais (3+ conexões)</h4>
+                            <p>Tolerância longa de <strong>360 dias</strong>. Documentos centrais de arquitetura e governança que exigem menos manutenção direta.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="decay-diagram" data-delay="100">
+                    <svg class="graph-connections" width="100%" height="100%">
+                        <!-- As linhas de conexão serão desenhadas dinamicamente via JS -->
+                        <line class="line-main" stroke="url(#gradient-line)" stroke-width="2.5" stroke-dasharray="6 4" />
+                        <line class="line-mock" stroke="rgba(255, 202, 40, 0.25)" stroke-width="1.5" stroke-dasharray="4 4" />
+                        <line class="line-mock" stroke="rgba(255, 202, 40, 0.25)" stroke-width="1.5" stroke-dasharray="4 4" />
+                        <defs>
+                            <linearGradient id="gradient-line" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="var(--accent-orange-premium)" stop-opacity="0.8" />
+                                <stop offset="100%" stop-color="var(--accent-yellow-premium)" stop-opacity="0.8" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    
+                    <div class="graph-node node-orphan" data-tooltip="Página Órfã (90 dias)">
+                        <span class="node-label">Órfã</span>
+                        <span class="node-decay">90d</span>
+                    </div>
+                    <div class="graph-node node-connected" data-tooltip="Página Conectada (180 dias)">
+                        <span class="node-label">Conectada</span>
+                        <span class="node-decay">180d</span>
+                    </div>
+                    <div class="graph-node node-hub" data-tooltip="Hub Central (360 dias)">
+                        <span class="node-label">Hub Central</span>
+                        <span class="node-decay">360d</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- COMPONENTES -->
     <section class="section" id="componentes">
         <div class="container">
@@ -141,14 +206,14 @@
             <div class="components-grid">
                 <div class="component-card" data-delay="0">
                     <div class="component-icon">🏛️</div>
-                    <h3>Governança</h3>
-                    <p>AGENTS.md + Rules definem o que seus agentes podem e não podem fazer. Pipeline de 4 fases (Scanner → Relational → Governance → Synthesis).</p>
-                    <span class="component-file">AGENTS.md</span>
+                    <h3>Multi-IDE & Governança</h3>
+                    <p>Setup e validação automatizada de regras nativas de contexto para Cursor, Claude Code, VS Code Copilot, Antigravity IDE, Codex e OpenCode de forma 100% DRY.</p>
+                    <span class="component-file">.cursorrules · .claudecode.json · AGENTS.md</span>
                 </div>
                 <div class="component-card" data-delay="100">
                     <div class="component-icon">🧩</div>
                     <h3>Skills</h3>
-                    <p>Capacidades modulares reutilizáveis. 3 skills core incluídas: Deep Metadata Analysis, Knowledge Wiki, Memory Maintenance.</p>
+                    <p>Capacidades modulares reutilizáveis. 10 skills inclusas como Deep Metadata, Socratic Brainstorming, Checklists e mais.</p>
                     <span class="component-file">.agents/skills/</span>
                 </div>
                 <div class="component-card" data-delay="200">
@@ -184,28 +249,39 @@
                 <div class="terminal-body">
                     <div class="terminal-line" data-step="1">
                         <span class="terminal-prompt">$</span>
-                        <span class="terminal-command" data-text="git clone https://github.com/juliano-ceconi/okam.git"></span>
-                        <span class="terminal-comment"># Clone o repositório</span>
+                        <span class="terminal-command" data-text="pip install okam"></span>
+                        <span class="terminal-comment"># Instale o framework de governança</span>
                     </div>
                     <div class="terminal-line" data-step="2">
                         <span class="terminal-prompt">$</span>
-                        <span class="terminal-command" data-text="cd okam"></span>
+                        <span class="terminal-command" data-text="okam setup"></span>
+                        <span class="terminal-comment"># Inicialize o wiki e regras interativamente</span>
                     </div>
-                    <div class="terminal-line" data-step="3">
-                        <span class="terminal-prompt">$</span>
-                        <span class="terminal-command" data-text="python knowledge/scripts/okf_manager.py --init"></span>
-                        <span class="terminal-comment"># Gera seed pages</span>
+                    <div class="terminal-line terminal-output" data-step="3">
+                        <span class="terminal-success">✓ Criado AGENTS.md na raiz</span>
+                    </div>
+                    <div class="terminal-line terminal-output" data-step="3b">
+                        <span class="terminal-success">✓ Configurado .cursorrules, .claudecode.json e Copilot</span>
                     </div>
                     <div class="terminal-line terminal-output" data-step="4">
-                        <span class="terminal-success">✅ 3 seed page(s) criada(s)</span>
+                        <span class="terminal-success">✓ Estrutura de memória iniciada em knowledge/wiki/</span>
                     </div>
                     <div class="terminal-line" data-step="5">
                         <span class="terminal-prompt">$</span>
-                        <span class="terminal-command" data-text="python knowledge/scripts/okf_manager.py --validate"></span>
-                        <span class="terminal-comment"># Valida conformidade OKF</span>
+                        <span class="terminal-command" data-text="okam doctor"></span>
+                        <span class="terminal-comment"># Valide a integridade e staleness dinâmico</span>
                     </div>
                     <div class="terminal-line terminal-output" data-step="6">
-                        <span class="terminal-success">✅ Todos os arquivos estão em conformidade com o OKF!</span>
+                        <span class="terminal-success">✓ Wiki: 3 página(s) em knowledge\wiki</span>
+                    </div>
+                    <div class="terminal-line terminal-output" data-step="7">
+                        <span class="terminal-success">✓ Regras presentes: AGENTS.md, .cursorrules, .claudecode.json</span>
+                    </div>
+                    <div class="terminal-line terminal-output" data-step="8">
+                        <span class="terminal-success">✓ Todas as páginas saudáveis conforme limites de conexões</span>
+                    </div>
+                    <div class="terminal-line terminal-output" data-step="9">
+                        <span class="terminal-success">✅ Ambiente saudável — 7/7 checks passaram!</span>
                     </div>
                 </div>
             </div>

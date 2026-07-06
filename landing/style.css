@@ -634,6 +634,181 @@ a:hover {
     transform: translateY(0);
 }
 
+/* --- Graph-Driven Decay --- */
+.decay-showcase {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 40px;
+    align-items: center;
+    margin-top: 48px;
+    padding: 40px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.decay-showcase::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-orange-premium), transparent);
+    opacity: 0.5;
+}
+
+.decay-details {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.decay-rule {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.decay-rule:hover {
+    transform: translateX(8px);
+    border-color: rgba(255, 112, 52, 0.3);
+    background: rgba(255, 112, 52, 0.02);
+}
+
+.rule-icon {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+
+.rule-icon.orphan {
+    color: var(--text-muted);
+    background: rgba(110, 118, 129, 0.05);
+    border: 1px solid rgba(110, 118, 129, 0.15);
+}
+
+.rule-icon.connected {
+    color: var(--accent-orange-premium);
+    background: rgba(255, 112, 52, 0.05);
+    border: 1px solid rgba(255, 112, 52, 0.2);
+}
+
+.rule-icon.central {
+    color: var(--accent-yellow-premium);
+    background: rgba(255, 202, 40, 0.05);
+    border: 1px solid rgba(255, 202, 40, 0.2);
+    box-shadow: 0 0 15px rgba(255, 202, 40, 0.1);
+}
+
+.rule-info h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.rule-info p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.decay-diagram {
+    position: relative;
+    height: 380px;
+    background: rgba(10, 10, 15, 0.4);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.graph-connections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.graph-node {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: default;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+    z-index: 2;
+}
+
+.graph-node:hover {
+    transform: scale(1.08);
+}
+
+.node-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+    opacity: 0.8;
+}
+
+.node-decay {
+    font-size: 16px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+}
+
+.node-orphan {
+    top: 45px;
+    left: 10%;
+    width: 80px;
+    height: 80px;
+    background: rgba(22, 27, 34, 0.8);
+    border: 2px solid var(--text-muted);
+    color: var(--text-muted);
+}
+
+.node-connected {
+    bottom: 45px;
+    left: 15%;
+    width: 95px;
+    height: 95px;
+    background: rgba(22, 27, 34, 0.8);
+    border: 2px solid var(--accent-orange-premium);
+    color: var(--accent-orange-premium);
+    box-shadow: 0 0 20px rgba(255, 112, 52, 0.1);
+}
+
+.node-hub {
+    top: 125px;
+    right: 15%;
+    width: 120px;
+    height: 120px;
+    background: rgba(22, 27, 34, 0.8);
+    border: 2px solid var(--accent-yellow-premium);
+    color: var(--accent-yellow-premium);
+    box-shadow: 0 0 30px rgba(255, 202, 40, 0.15);
+}
+
 /* --- Mobile --- */
 @media (max-width: 768px) {
     .nav-links {
@@ -689,6 +864,37 @@ a:hover {
 
     .section {
         padding: 60px 0;
+    }
+
+    .decay-showcase {
+        grid-template-columns: 1fr;
+        padding: 24px;
+        gap: 32px;
+    }
+
+    .decay-diagram {
+        height: 320px;
+    }
+
+    .node-orphan {
+        top: 30px;
+        left: 8%;
+        width: 70px;
+        height: 70px;
+    }
+
+    .node-connected {
+        bottom: 30px;
+        left: 12%;
+        width: 85px;
+        height: 85px;
+    }
+
+    .node-hub {
+        top: 95px;
+        right: 10%;
+        width: 110px;
+        height: 110px;
     }
 }
 
