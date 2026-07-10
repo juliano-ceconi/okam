@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <defs>
+        <linearGradient id="okam-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffca28" />
+            <stop offset="100%" stop-color="#ff7034" />
+        </linearGradient>
+    </defs>
+    <polygon points="50,12 83,31 83,69 50,88 17,69 17,31" fill="none" stroke="url(#okam-gradient)" stroke-width="8" stroke-linejoin="round" />
+</svg>
