@@ -27,6 +27,23 @@ Okam resolve isso com:
 - 📚 **Wiki de Conhecimento** — Memória persistente no formato OKF (não é RAG)
 - 🔍 **Pipeline de Metadados** — Extrai a "alma" dos seus projetos automaticamente
 
+## Funciona no Seu Editor
+
+O Okam não amarra você a uma ferramenta. Ele escreve as regras no `AGENTS.md` —
+o padrão aberto que **todos** os principais agentes leem nativamente — e cria
+apenas os bridges finos necessários onde a plataforma pede outro formato:
+
+| Plataforma | Arquivo lido | Gerado pelo Okam |
+|:---|:---|:---|
+| Cursor | `AGENTS.md` | ✅ |
+| Codex | `AGENTS.md` | ✅ |
+| Antigravity | `AGENTS.md` + `.agents/rules/` | ✅ |
+| OpenCode | `AGENTS.md` | ✅ |
+| VS Code / Copilot | `AGENTS.md` e `.github/copilot-instructions.md` | ✅ ambos |
+| Claude Code | `CLAUDE.md` | ✅ (bridge com `@AGENTS.md`) |
+
+Uma fonte única de verdade, sem duplicar regra em cinco arquivos diferentes.
+
 ## Quick Start (5 minutos)
 
 ```bash
@@ -65,7 +82,7 @@ Para o guia completo, veja o [QUICKSTART.md](./QUICKSTART.md).
 ```
 okam/
 ├── .agents/
-│   ├── rules/           # Padrões de governança
+│   ├── rules/           # Padrões de governança (instalados no seu projeto)
 │   ├── skills/          # Capacidades modulares
 │   │   ├── agentic-testing-companion/
 │   │   ├── checklists/
@@ -90,6 +107,7 @@ okam/
 ├── docs/
 │   ├── concepts/        # Documentação de conceitos
 │   └── diagrams/        # Diagramas Mermaid
+├── tests/               # Smoke tests do núcleo (pytest)
 ├── landing/             # Landing page
 ├── AGENTS.md            # Governança central
 ├── QUICKSTART.md        # Guia rápido
@@ -117,10 +135,12 @@ A partir daí, todo `git push` dispara deploy automático — sem ação manual.
 
 1. Fork o repositório
 2. Crie uma branch para sua feature (`git checkout -b feat/minha-feature`)
-3. Instale os hooks de governança (`okam hooks install`)
-4. Commit suas mudanças (`git commit -m 'feat: adiciona minha feature'`)
-5. Push para a branch (`git push origin feat/minha-feature`)
-6. Abra um Pull Request
+3. Instale em modo dev com as dependências de teste (`pip install -e ".[dev]"`)
+4. Instale os hooks de governança (`okam hooks install`)
+5. Rode os testes (`python -m pytest tests/ -q`)
+6. Commit suas mudanças (`git commit -m 'feat: adiciona minha feature'`)
+7. Push para a branch (`git push origin feat/minha-feature`)
+8. Abra um Pull Request
 
 ## Licença
 

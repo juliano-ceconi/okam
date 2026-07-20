@@ -6,7 +6,7 @@ resource: workspace
 timestamp: 2026-07-01
 tags:
   - tipo/guia
-  - onboarding
+  - tema/onboarding
 parent: "[[index]]"
 ---
 

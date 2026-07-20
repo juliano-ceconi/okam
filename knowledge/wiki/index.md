@@ -21,7 +21,7 @@ Bem-vindo ao catálogo central de conhecimento persistente.
 
 ## 01. Conceitos
 
-*(Adicione links para páginas de conceitos aqui)*
+- [[multi-agent-bridge]]: Qual arquivo de regras cada plataforma de IA lê.
 
 ## 02. Entidades
 

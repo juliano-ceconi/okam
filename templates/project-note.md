@@ -1,6 +1,4 @@
 ---
-tags:
-  - projeto
 status: 📥 Inbox
 prioridade: 🟡 Média
 data_criacao: {{date}}

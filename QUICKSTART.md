@@ -33,7 +33,24 @@ okam setup
 
 Isso irá interativamente:
 1. Criar a estrutura do wiki e as 3 seed pages iniciais.
-2. Perguntar se você deseja instalar os Git Hooks de governança.
+2. Instalar o catálogo de skills nativas em `.agents/skills/`.
+3. Instalar os padrões de governança em `.agents/rules/`.
+4. Gerar os arquivos de regras que seu agente lê (veja a tabela abaixo).
+5. Perguntar se você deseja instalar os Git Hooks de governança.
+
+### Quais arquivos são gerados (e por quê)
+
+O Okam usa o `AGENTS.md` como **fonte única** — é o padrão aberto lido nativamente
+pela maioria dos agentes. Os demais arquivos são bridges finos, sem duplicar regra:
+
+| Arquivo | Quem lê |
+|:---|:---|
+| `AGENTS.md` | Cursor, Codex, Antigravity, OpenCode, VS Code/Copilot |
+| `CLAUDE.md` | Claude Code (importa o `AGENTS.md` via `@AGENTS.md`) |
+| `.github/copilot-instructions.md` | VS Code / GitHub Copilot |
+| `.agents/rules/` | Antigravity (nativo) e demais agentes por referência |
+
+> Editou uma regra? Edite **só o `AGENTS.md`**. Os outros apontam para ele.
 
 *(Para automação em CI/CD ou evitar prompts, use `okam setup --yes`)*
 
@@ -134,6 +151,7 @@ O Okam já vem com um conjunto de skills prontas na pasta `.agents/skills/` para
 | `agentic-testing-companion` | Padrões de desenvolvimento orientado a testes (TDD) locais. |
 | `secret-leak-audit` | Varredura e higienização de chaves de API expostas em arquivos locais. |
 | `context-loop-manager` | Gestão de escopos de tarefas complexas rodando em múltiplos blocos isolados. |
+| `checklists` | Checklists operacionais reutilizáveis para fechamento de tarefas. |
 
 ## Próximos Passos
 

@@ -1,12 +1,15 @@
 ---
+type: projeto
+area: inteligência
+parent: [[Dashboard_Central]]
 tags:
-  - projeto
-  - okam
+  - area/inteligência
+  - projeto/okam
 status: 🟡 Em Desenvolvimento
 prioridade: 🔴 Alta
 faturamento_previsto: 0
 data_criacao: 2026-07-01
-data_revisao: 2026-07-01
+data_revisao: 2026-07-20
 impacto_pareto: 20%
 ---
 
@@ -31,3 +34,21 @@ Links Úteis:
 - [ ] Criar repositório GitHub público em `juliano-ceconi/okam`
 - [ ] Publicar a primeira versão do framework
 - [ ] Monitorar feedbacks de desenvolvedores
+
+### Evolução com práticas do harness (planejado 2026-07-07)
+Análise/plano curado em [26-07-07-at-21-59-plano-evolucao-okam-praticas-harness.md](file:///d:/projetos/juliano-ceconi/_artefatos-agentes/07/26-07-07/26-07-07-at-21-59-plano-evolucao-okam-praticas-harness.md). Curadoria: adotar 3 itens, descartar o resto para não inflar o framework.
+- [ ] **Item 1** — check de teto de contexto (warn-only) no `okam doctor`.
+- [ ] **Item 2** — regra do teto em `governance-standards.md`.
+- [ ] **Item 3** — bridge nativo `CLAUDE.md` → `@AGENTS.md` (gerador + check no doctor).
+- Fora de escopo (justificado no plano): painel de sessão por host, `__task-atual/`, rotação de log, skills via junction.
+- Já coberto pelo okam: poda/staleness dinâmica (`doctor`), warn-não-bloqueia, bridge multi-CLI.
+
+### Revisão de qualidade e correção do bridge — v0.6.0 (2026-07-20)
+Revisão focada em usabilidade para terceiros. Artefato:
+[26-07-20-at-19-40-revisao-okam-v060.md](file:///d:/projetos/juliano-ceconi/_artefatos-agentes/07/26-07-20/26-07-20-at-19-40-revisao-okam-v060.md).
+- [x] **Path local vazado** — `_generate_ide_rules` gerava links para `file:///d:/projetos/juliano-ceconi/...` em todo projeto de usuário. Corrigido.
+- [x] **Bridge multi-agente corrigido** — removidos `.claudecode.json` (não existe no Claude Code) e `.cursorrules` (formato legado, não lido em Agent mode). `AGENTS.md` passa a ser fonte única; bridges finos só em `CLAUDE.md` e `.github/copilot-instructions.md`. Verificado nas docs oficiais das 6 plataformas.
+- [x] **`.agents/rules/` empacotado** — antes nunca chegava ao usuário, deixando o check de orçamento de contexto do `doctor` medindo arquivo ausente.
+- [x] **Colisão de packaging** — wheel embarcava `okam/hooks.py` e `okam/hooks/`; scripts movidos para `okam/_hook_scripts` (com fallback para o layout legado).
+- [x] **Suíte de testes** — 9 smoke tests (validação OKF + ciclo de vida dos hooks), rodando no CI.
+- [x] **Landing e docs** — alinhadas ao novo conjunto de arquivos.
