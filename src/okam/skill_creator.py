@@ -25,8 +25,8 @@ def find_workspace_root():
     """Sobe a árvore de diretórios a partir do atual para achar a raiz do workspace."""
     current = os.path.abspath(os.getcwd())
     while True:
-        # Indicadores de raiz do workspace okam/Juliano
-        indicators = ['.git', '.agents', 'AGENTS.md', 'Dashboard_Central.md']
+        # Indicadores de raiz de um projeto governado
+        indicators = ['.git', '.agents', 'AGENTS.md']
         for ind in indicators:
             if os.path.exists(os.path.join(current, ind)):
                 return current
@@ -167,22 +167,74 @@ Adicione exemplos de prompt ou referências úteis de código aqui.
     print_colored(f"Caminho: {target_skill_dir}\n", COLOR_BLUE)
 
 
-def _get_skills_source_dir():
-    """Retorna o diretório onde as skills nativas do Okam estão armazenadas."""
-    package_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # 1. Tenta o layout do wheel (pasta skills embutida dentro de okam/skills)
-    dist_skills_dir = os.path.join(package_dir, "skills")
-    if os.path.isdir(dist_skills_dir):
-        return dist_skills_dir
+def _get_asset_source_dir(dist_name, dev_relpath):
+    """Localiza um diretório de assets do Okam (skills, rules) nos dois layouts.
 
-    # 2. Tenta o layout do source code/modo dev (pasta .agents/skills está na raiz do repositório)
+    Args:
+        dist_name: nome da pasta embutida no wheel (ex: 'skills' -> okam/skills).
+        dev_relpath: tupla com o caminho relativo à raiz do repo no modo dev
+                     (ex: ('.agents', 'skills')).
+    """
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # 1. Layout do wheel (pasta embutida dentro do pacote okam/)
+    dist_dir = os.path.join(package_dir, dist_name)
+    if os.path.isdir(dist_dir):
+        return dist_dir
+
+    # 2. Layout do código-fonte / modo dev (pasta na raiz do repositório)
     repo_dir = os.path.dirname(os.path.dirname(package_dir))
-    dev_skills_dir = os.path.join(repo_dir, ".agents", "skills")
-    if os.path.isdir(dev_skills_dir):
-        return dev_skills_dir
+    dev_dir = os.path.join(repo_dir, *dev_relpath)
+    if os.path.isdir(dev_dir):
+        return dev_dir
 
     return None
+
+
+def _get_skills_source_dir():
+    """Retorna o diretório onde as skills nativas do Okam estão armazenadas."""
+    return _get_asset_source_dir("skills", (".agents", "skills"))
+
+
+def _get_rules_source_dir():
+    """Retorna o diretório onde as rules nativas do Okam estão armazenadas."""
+    return _get_asset_source_dir("rules", (".agents", "rules"))
+
+
+def install_native_rules(workspace_root=None):
+    """Copia as rules nativas para .agents/rules do workspace de forma não-destrutiva."""
+    if workspace_root is None:
+        workspace_root = find_workspace_root()
+
+    source_dir = _get_rules_source_dir()
+    if source_dir is None:
+        print_colored(
+            "Aviso: Catálogo de rules nativas não encontrado. Pulando instalação.",
+            COLOR_YELLOW,
+        )
+        return False
+
+    target_rules_dir = os.path.join(workspace_root, ".agents", "rules")
+    os.makedirs(target_rules_dir, exist_ok=True)
+
+    print_colored("\nInstalando padrões de governança (.agents/rules)...", COLOR_BLUE)
+
+    installed = 0
+    for filename in sorted(os.listdir(source_dir)):
+        src_file = os.path.join(source_dir, filename)
+        if not os.path.isfile(src_file):
+            continue
+        dst_file = os.path.join(target_rules_dir, filename)
+        if os.path.exists(dst_file):
+            print_colored(f"  [EXISTE] {filename} — pulando", COLOR_YELLOW)
+            continue
+        shutil.copy2(src_file, dst_file)
+        print_colored(f"  [INSTALADA] {filename}", COLOR_GREEN)
+        installed += 1
+
+    if installed == 0:
+        print_colored("✓ Padrões de governança já presentes no workspace.", COLOR_GREEN)
+    return True
 
 
 def install_native_skills(workspace_root=None, auto_yes=False):

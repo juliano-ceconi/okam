@@ -1,6 +1,10 @@
 # Governança de Agentes
 
+> [!IMPORTANT]
+> **Aviso de Escopo Local:** As regras operacionais e caminhos de diretórios (como `./knowledge/`) definidos neste arquivo referem-se estritamente ao desenvolvimento e empacotamento interno da biblioteca/CLI **Okam**. Para as diretrizes e Wiki globais do Meta-Repo, consulte o `AGENTS.md` da raiz do workspace.
+
 Este documento define a arquitetura operacional de todos os Agentes de IA neste workspace. Objetivo: **Entendimento Holístico e Execução de Baixo Churn**.
+
 
 ## Visão Geral
 

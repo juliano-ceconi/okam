@@ -1,12 +1,11 @@
-# Okam Rules for GitHub Copilot / VS Code Copilot
+# Instruções para o GitHub Copilot / VS Code
 
-This project uses Okam for AI governance and persistent memory.
+Este projeto é governado pelo Okam.
 
-Please comply with the following instructions:
-1. Read the central governance standards in [AGENTS.md](file:///d:/projetos/juliano-ceconi/AGENTS.md).
-2. Follow the modular workflow skills defined in `.agents/skills/`.
-3. Check and update the project knowledge wiki located at `knowledge/wiki/`.
+Leia e siga o `AGENTS.md` na raiz do projeto — ele é a fonte única de governança.
+As capacidades modulares ficam em `.agents/skills/`, os padrões de governança em
+`.agents/rules/` e a memória persistente do projeto em `knowledge/wiki/` (formato OKF).
 
-Coding standard:
-- Implement surgical, localized changes to minimize code churn.
-- Maintain documentation integrity and preserve existing comments.
+Padrão de código:
+- Faça alterações cirúrgicas e localizadas para minimizar churn.
+- Preserve a integridade da documentação e os comentários existentes.

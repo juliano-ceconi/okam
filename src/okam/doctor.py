@@ -75,19 +75,66 @@ def _check_agents_md(workspace):
     return os.path.isfile(os.path.join(workspace, "AGENTS.md"))
 
 
-def _check_cursorrules(workspace):
-    """Verifica se .cursorrules (Cursor/OpenCode) existe na raiz."""
-    return os.path.isfile(os.path.join(workspace, ".cursorrules"))
-
-
 def _check_copilot_instructions(workspace):
     """Verifica se .github/copilot-instructions.md (VS Code Copilot) existe."""
     return os.path.isfile(os.path.join(workspace, ".github", "copilot-instructions.md"))
 
 
-def _check_claudecode_config(workspace):
-    """Verifica se .claudecode.json (Claude Code) existe na raiz."""
-    return os.path.isfile(os.path.join(workspace, ".claudecode.json"))
+def _check_legacy_rule_files(workspace):
+    """Lista arquivos de regras obsoletos deixados por versões <= 0.5.0.
+
+    `.claudecode.json` nunca foi lido pelo Claude Code e `.cursorrules` é formato
+    legado do Cursor. O Okam não os remove (escrita não-destrutiva), apenas avisa.
+    """
+    legacy = [".claudecode.json", ".cursorrules"]
+    return [name for name in legacy if os.path.exists(os.path.join(workspace, name))]
+
+
+def _check_claude_md(workspace):
+    """Verifica se CLAUDE.md (bridge nativo Claude Code → @AGENTS.md) existe na raiz."""
+    return os.path.isfile(os.path.join(workspace, "CLAUDE.md"))
+
+
+def _env_int(name, default):
+    """Lê um inteiro de env var; volta ao default se ausente ou inválido."""
+    try:
+        return int(os.environ.get(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def _check_context_budget(workspace):
+    """Mede o orçamento de contexto do bootstrap auto-carregado.
+
+    Bootstrap = AGENTS.md (raiz) + .agents/rules/governance-standards.md.
+    Estimativa de tokens ≈ ceil(chars / 4). Warn-only: nunca derruba o exit code.
+
+    Retorna (total_tokens, parts, warn, audit), onde parts é uma lista de
+    (rel_path, tokens, existe).
+    """
+    warn = _env_int("OKAM_CONTEXT_BUDGET_WARN", 5000)
+    audit = _env_int("OKAM_CONTEXT_BUDGET_AUDIT", 6000)
+    bootstrap_files = [
+        "AGENTS.md",
+        os.path.join(".agents", "rules", "governance-standards.md"),
+    ]
+    total_tokens = 0
+    parts = []
+    for rel in bootstrap_files:
+        abs_path = os.path.join(workspace, rel)
+        if not os.path.isfile(abs_path):
+            parts.append((rel, 0, False))
+            continue
+        try:
+            with open(abs_path, "r", encoding="utf-8") as f:
+                chars = len(f.read())
+        except OSError:
+            parts.append((rel, 0, False))
+            continue
+        tokens = -(-chars // 4)  # ceil(chars / 4)
+        total_tokens += tokens
+        parts.append((rel, tokens, True))
+    return total_tokens, parts, warn, audit
 
 
 
@@ -216,25 +263,31 @@ def run_doctor():
         )
         failed += 1
 
-    # 6. AGENTS.md
+    # 6. AGENTS.md — fonte única, lida nativamente pela maioria dos agentes
     agents_ok = _check_agents_md(workspace)
     if agents_ok:
-        print_colored("  ✓ AGENTS.md presente na raiz (Antigravity IDE & Codex)", COLOR_GREEN)
+        print_colored(
+            "  ✓ AGENTS.md presente na raiz (Cursor, Codex, Antigravity, OpenCode, Copilot)",
+            COLOR_GREEN,
+        )
         passed += 1
     else:
         print_colored(
-            "  ~ AGENTS.md não encontrado (opcional, mas recomendado para Antigravity IDE & Codex)",
-            COLOR_YELLOW,
+            "  ✗ AGENTS.md não encontrado — é a fonte única de governança (rode: okam init)",
+            COLOR_RED,
         )
-        warnings += 1
+        failed += 1
 
-    # 6.1. .cursorrules (Cursor & OpenCode)
-    cursor_ok = _check_cursorrules(workspace)
-    if cursor_ok:
-        print_colored("  ✓ .cursorrules presente na raiz (Cursor & OpenCode)", COLOR_GREEN)
+    # 6.1. CLAUDE.md (Claude Code — bridge nativo @AGENTS.md)
+    claude_md_ok = _check_claude_md(workspace)
+    if claude_md_ok:
+        print_colored("  ✓ CLAUDE.md presente na raiz (Claude Code — bridge @AGENTS.md)", COLOR_GREEN)
         passed += 1
     else:
-        print_colored("  ~ .cursorrules não encontrado (opcional, mas recomendado para Cursor & OpenCode)", COLOR_YELLOW)
+        print_colored(
+            "  ~ CLAUDE.md não encontrado (recomendado para Claude Code — bridge @AGENTS.md)",
+            COLOR_YELLOW,
+        )
         warnings += 1
 
     # 6.2. .github/copilot-instructions.md (VS Code Copilot)
@@ -243,16 +296,24 @@ def run_doctor():
         print_colored("  ✓ .github/copilot-instructions.md presente (VS Code Copilot)", COLOR_GREEN)
         passed += 1
     else:
-        print_colored("  ~ .github/copilot-instructions.md não encontrado (opcional, mas recomendado para VS Code Copilot)", COLOR_YELLOW)
+        print_colored(
+            "  ~ .github/copilot-instructions.md não encontrado (opcional — o VS Code também lê AGENTS.md)",
+            COLOR_YELLOW,
+        )
         warnings += 1
 
-    # 6.3. .claudecode.json (Claude Code)
-    claude_ok = _check_claudecode_config(workspace)
-    if claude_ok:
-        print_colored("  ✓ .claudecode.json presente na raiz (Claude Code)", COLOR_GREEN)
-        passed += 1
-    else:
-        print_colored("  ~ .claudecode.json não encontrado (opcional, mas recomendado para Claude Code)", COLOR_YELLOW)
+    # 6.3. Arquivos de regras obsoletos (herança de versões <= 0.5.0)
+    legacy_files = _check_legacy_rule_files(workspace)
+    if legacy_files:
+        print_colored(
+            f"  ~ Arquivo(s) de regra obsoleto(s): {', '.join(legacy_files)}",
+            COLOR_YELLOW,
+        )
+        print_colored(
+            "      Nenhum agente lê esses arquivos hoje — a governança vive no AGENTS.md.",
+            COLOR_YELLOW,
+        )
+        print_colored("      Podem ser removidos com segurança.", COLOR_YELLOW)
         warnings += 1
 
     # 7. Obsolescência de Conhecimento
@@ -268,6 +329,33 @@ def run_doctor():
         else:
             print_colored("  ✓ Todas as páginas atualizadas de acordo com o limite dinâmico", COLOR_GREEN)
             passed += 1
+
+    # 8. Orçamento de contexto (bootstrap auto-carregado) — WARN-ONLY
+    ctx_tokens, ctx_parts, ctx_warn, ctx_audit = _check_context_budget(workspace)
+    ctx_detail = " + ".join(
+        f"{rel} (~{tok}t)" if exists else f"{rel} (ausente)"
+        for rel, tok, exists in ctx_parts
+    )
+    if ctx_tokens >= ctx_audit:
+        print_colored(
+            f"  ~ Orçamento de contexto (~{ctx_tokens}t) acima do teto de auditoria ({ctx_audit}t) — auditar/simplificar regras",
+            COLOR_YELLOW,
+        )
+        print_colored(f"      {ctx_detail}", COLOR_YELLOW)
+        warnings += 1
+    elif ctx_tokens >= ctx_warn:
+        print_colored(
+            f"  ~ Orçamento de contexto (~{ctx_tokens}t) acima do alvo ({ctx_warn}t)",
+            COLOR_YELLOW,
+        )
+        print_colored(f"      {ctx_detail}", COLOR_YELLOW)
+        warnings += 1
+    else:
+        print_colored(
+            f"  ✓ Orçamento de contexto (~{ctx_tokens}t) dentro do alvo (< {ctx_warn}t)",
+            COLOR_GREEN,
+        )
+        passed += 1
 
     # Sumário
     print()

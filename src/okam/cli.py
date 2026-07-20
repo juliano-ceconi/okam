@@ -21,6 +21,7 @@ from okam.skill_creator import (
     COLOR_BOLD,
     find_workspace_root,
     install_native_skills,
+    install_native_rules,
 )
 from okam.hooks import (
     install_hooks,
@@ -172,19 +173,26 @@ Controlam como o conhecimento é criado, validado e mantido.
 
     print_colored(f"\n✅ {created} seed page(s) criada(s) em {wiki_dir}", COLOR_GREEN + COLOR_BOLD)
 
+    workspace_root = find_workspace_root()
+    print_colored(f"\nRaiz do projeto detectada: {workspace_root}", COLOR_BLUE)
+
     # Copiar catálogo de skills nativas
     try:
-        workspace_root = find_workspace_root()
         install_native_skills(workspace_root, auto_yes)
     except Exception as e:
         print_colored(f"Erro ao instalar skills nativas: {e}", COLOR_YELLOW)
 
-    # Configurar regras nativas para IDEs de IA (Cursor, Claude Code, Copilot, etc.)
+    # Copiar padrões de governança para .agents/rules
     try:
-        workspace_root = find_workspace_root()
+        install_native_rules(workspace_root)
+    except Exception as e:
+        print_colored(f"Erro ao instalar rules nativas: {e}", COLOR_YELLOW)
+
+    # Gerar os arquivos de regras lidos nativamente pelos agentes de IA
+    try:
         _generate_ide_rules(workspace_root)
     except Exception as e:
-        print_colored(f"Erro ao gerar regras nativas para IDEs: {e}", COLOR_YELLOW)
+        print_colored(f"Erro ao gerar regras nativas para agentes: {e}", COLOR_YELLOW)
 
     # Oferecer instalação de hooks (pular se chamado via setup com --yes)
     if not auto_yes:
@@ -199,98 +207,95 @@ Controlam como o conhecimento é criado, validado e mantido.
             pass  # Non-interactive ou cancelado — pular silenciosamente
 
 
-def _generate_ide_rules(workspace_root):
-    """Gera arquivos de configuração e regras nativas para IDEs de IA na raiz do workspace."""
-    print_colored("\nConfigurando regras nativas para IDEs de IA...", COLOR_BLUE)
+def _write_if_absent(path, content, label):
+    """Escreve o arquivo apenas se ele ainda não existir (não-destrutivo)."""
+    if os.path.exists(path):
+        print_colored(f"  [EXISTE] {label} — pulando", COLOR_YELLOW)
+        return False
+    parent = os.path.dirname(path)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    print_colored(f"  [CRIADO] {label}", COLOR_GREEN)
+    return True
 
-    # 1. AGENTS.md
-    agents_path = os.path.join(workspace_root, "AGENTS.md")
+
+def _generate_ide_rules(workspace_root):
+    """Gera os arquivos de regras lidos nativamente pelos agentes de IA.
+
+    Estratégia: AGENTS.md é a fonte única — lido nativamente por Cursor, Codex,
+    Antigravity, OpenCode e VS Code Copilot. Os demais arquivos são bridges finos
+    que apenas apontam para ele, sem duplicar conteúdo.
+    """
+    print_colored("\nConfigurando regras nativas para agentes de IA...", COLOR_BLUE)
+
+    # 1. AGENTS.md — fonte única de governança
     agents_content = """# 🏛️ Governança de Agentes de IA
 
-Este arquivo define as regras operacionais para todos os Agentes de IA que atuam neste Workspace. Nosso objetivo é obter soluções corretas, seguras e com baixo churn de código.
+Este arquivo define as regras operacionais para todos os Agentes de IA que atuam
+neste projeto. Objetivo: soluções corretas, seguras e com baixo churn de código.
+
+> Este é o arquivo **fonte única** de governança. Ele é lido nativamente por
+> Cursor, Codex, Antigravity, OpenCode e VS Code Copilot. O Claude Code o importa
+> via `CLAUDE.md`.
 
 ## Pipeline de Inteligência (Core Agent Pipeline)
 
-Antes de fazer alterações complexas ou que afetem múltiplos arquivos:
+Antes de alterações complexas ou que afetem múltiplos arquivos:
 1. **Scanner:** Mapeie o repositório, identifique dependências e a arquitetura existente.
 2. **Relational:** Compreenda as regras de negócio e conexões entre componentes.
-3. **Governance:** Valide as regras de conformidade e certifique-se de que não há vazamento de chaves ou credenciais.
-4. **Synthesis:** Eternize o aprendizado na Wiki local (`knowledge/wiki/`) e garanta que está tudo em conformidade com o formato OKF.
+3. **Governance:** Valide a conformidade e certifique-se de que não há vazamento de credenciais.
+4. **Synthesis:** Eternize o aprendizado na Wiki local (`knowledge/wiki/`) em formato OKF.
 
 ## Convenções e Regras de Ouro
 
-- **Slow is Fast:** Prefira soluções simples, modulares e de fácil manutenção sobre arquiteturas complexas.
-- **Surgical Changes:** Evite reescrever arquivos inteiros se puder realizar alterações cirúrgicas e localizadas.
-- **Wiki de Conhecimento:** Use `knowledge/wiki/` como memória persistente de longo prazo. Sempre que aprender uma lição relevante sobre este projeto, crie ou atualize uma página de conhecimento em formato OKF.
-- **Hooks de Validação:** Execute `okam validate` antes de enviar mudanças importantes.
+- **Slow is Fast:** Prefira soluções simples e legíveis a abstrações complexas.
+- **Surgical Changes:** Evite reescrever arquivos inteiros quando uma alteração localizada resolve.
+- **Wiki de Conhecimento:** Use `knowledge/wiki/` como memória persistente de longo prazo.
+  Ao aprender algo relevante sobre este projeto, crie ou atualize uma página OKF.
+- **Skills:** Consulte as capacidades modulares em `.agents/skills/` quando forem relevantes.
+- **Validação:** Rode `okam validate` antes de enviar mudanças importantes.
+
+## Proibições
+
+- Nunca registre segredos, chaves de API ou credenciais em commits, logs ou artefatos.
+- Não use arquivos temporários para lógica de negócio ou dados persistentes.
 """
-    if not os.path.exists(agents_path):
-        with open(agents_path, 'w', encoding='utf-8') as f:
-            f.write(agents_content)
-        print_colored("  [CRIADO] AGENTS.md (Antigravity IDE & Codex)", COLOR_GREEN)
-    else:
-        print_colored("  [EXISTE] AGENTS.md — pulando", COLOR_YELLOW)
+    _write_if_absent(
+        os.path.join(workspace_root, "AGENTS.md"),
+        agents_content,
+        "AGENTS.md (fonte única — Cursor, Codex, Antigravity, OpenCode, Copilot)",
+    )
 
-    # 2. .cursorrules (Cursor & OpenCode)
-    cursorrules_path = os.path.join(workspace_root, ".cursorrules")
-    cursorrules_content = """# Okam Rules for Cursor & OpenCode
+    # 2. CLAUDE.md — bridge nativo do Claude Code via import @AGENTS.md
+    claude_md_content = """@AGENTS.md
 
-You are an AI assistant helping with this codebase.
-This project uses Okam for AI governance and persistent memory.
+# Claude Code
 
-Before starting any task:
-1. READ and STRICTLY FOLLOW the guidelines in [AGENTS.md](file:///d:/projetos/juliano-ceconi/AGENTS.md) at the project root.
-2. UTILIZE the modular skills defined in the `.agents/skills/` directory when relevant.
-3. REFER to and update the persistent memory wiki in `knowledge/wiki/` (format OKF).
-
-Coding standards:
-- Make small, incremental, and surgical changes.
-- Prioritize simplicity (YAGNI > KISS > DRY).
-- Verify changes using existing test suites or code validation tools.
+Toda a governança deste projeto vem do import `@AGENTS.md` acima (fonte única).
+Nenhuma instrução adicional específica de Claude Code por enquanto.
 """
-    if not os.path.exists(cursorrules_path):
-        with open(cursorrules_path, 'w', encoding='utf-8') as f:
-            f.write(cursorrules_content)
-        print_colored("  [CRIADO] .cursorrules (Cursor & OpenCode)", COLOR_GREEN)
-    else:
-        print_colored("  [EXISTE] .cursorrules — pulando", COLOR_YELLOW)
+    _write_if_absent(
+        os.path.join(workspace_root, "CLAUDE.md"),
+        claude_md_content,
+        "CLAUDE.md (Claude Code — bridge @AGENTS.md)",
+    )
 
-    # 3. .github/copilot-instructions.md (VS Code Copilot)
-    github_dir = os.path.join(workspace_root, ".github")
-    copilot_path = os.path.join(github_dir, "copilot-instructions.md")
-    copilot_content = """# Okam Rules for GitHub Copilot / VS Code Copilot
+    # 3. .github/copilot-instructions.md — bridge fino para VS Code Copilot
+    copilot_content = """# Instruções para o GitHub Copilot / VS Code
 
-This project uses Okam for AI governance and persistent memory.
+Este projeto é governado pelo Okam.
 
-Please comply with the following instructions:
-1. Read the central governance standards in [AGENTS.md](file:///d:/projetos/juliano-ceconi/AGENTS.md).
-2. Follow the modular workflow skills defined in `.agents/skills/`.
-3. Check and update the project knowledge wiki located at `knowledge/wiki/`.
-
-Coding standard:
-- Implement surgical, localized changes to minimize code churn.
-- Maintain documentation integrity and preserve existing comments.
+Leia e siga o `AGENTS.md` na raiz do projeto — ele é a fonte única de governança.
+As capacidades modulares ficam em `.agents/skills/` e a memória persistente do
+projeto em `knowledge/wiki/` (formato OKF).
 """
-    if not os.path.exists(copilot_path):
-        os.makedirs(github_dir, exist_ok=True)
-        with open(copilot_path, 'w', encoding='utf-8') as f:
-            f.write(copilot_content)
-        print_colored("  [CRIADO] .github/copilot-instructions.md (VS Code Copilot)", COLOR_GREEN)
-    else:
-        print_colored("  [EXISTE] .github/copilot-instructions.md — pulando", COLOR_YELLOW)
-
-    # 4. .claudecode.json (Claude Code)
-    claudecode_path = os.path.join(workspace_root, ".claudecode.json")
-    claudecode_content = """{
-  "customInstructions": "This project is governed by Okam. Read and strictly follow the rules in AGENTS.md, use the skills defined in .agents/skills/, and access/update the persistent knowledge wiki in knowledge/wiki/."
-}
-"""
-    if not os.path.exists(claudecode_path):
-        with open(claudecode_path, 'w', encoding='utf-8') as f:
-            f.write(claudecode_content)
-        print_colored("  [CRIADO] .claudecode.json (Claude Code)", COLOR_GREEN)
-    else:
-        print_colored("  [EXISTE] .claudecode.json — pulando", COLOR_YELLOW)
+    _write_if_absent(
+        os.path.join(workspace_root, ".github", "copilot-instructions.md"),
+        copilot_content,
+        ".github/copilot-instructions.md (VS Code Copilot)",
+    )
 
 
 
