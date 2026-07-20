@@ -31,11 +31,16 @@ def _get_hooks_source_dir():
     """Retorna o diretório onde os hook scripts do Okam estão armazenados."""
     # O diretório do arquivo atual: .../okam/src/okam/hooks.py (dev) ou .../site-packages/okam/hooks.py (dist)
     package_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # 1. Tenta o layout do wheel (pasta hooks embutida dentro de okam/hooks)
-    dist_hooks_dir = os.path.join(package_dir, "hooks")
+
+    # 1. Layout do wheel (scripts embutidos em okam/_hook_scripts)
+    dist_hooks_dir = os.path.join(package_dir, "_hook_scripts")
     if os.path.isdir(dist_hooks_dir):
         return dist_hooks_dir
+
+    # 1b. Layout legado (<= 0.5.0 embarcava em okam/hooks, colidindo com hooks.py)
+    legacy_hooks_dir = os.path.join(package_dir, "hooks")
+    if os.path.isdir(legacy_hooks_dir):
+        return legacy_hooks_dir
 
     # 2. Tenta o layout do source code/modo dev (pasta hooks está na raiz do repositório, src/okam/../../hooks)
     # package_dir = src/okam
