@@ -14,6 +14,7 @@ BOLD='\033[1m'
 RESET='\033[0m'
 
 ERRORS=0
+OKF_SKIPPED=0
 
 # ── 1. OKF Validation ──────────────────────────────────────────────────────
 # Find staged .md files in wiki directories
@@ -24,16 +25,21 @@ if [ -n "$WIKI_FILES" ]; then
 
     # Check if okam CLI is available
     if command -v okam >/dev/null 2>&1; then
-        # Valida apenas os arquivos staged individuais de uma vez
-        RESULT=$(okam validate $WIKI_FILES 2>&1) || true
-        echo "$RESULT"
-
-        if echo "$RESULT" | grep -q "\[FALHA\]"; then
+        # Valida apenas os arquivos staged individuais de uma vez.
+        # Decide pelo exit code, nunca pelo texto da saida: se o comando falhar
+        # por qualquer motivo (crash, CLI errado no PATH), o hook precisa
+        # bloquear em vez de aprovar em silencio.
+        if RESULT=$(okam validate $WIKI_FILES 2>&1); then
+            echo "$RESULT"
+        else
+            echo "$RESULT"
             ERRORS=$((ERRORS + 1))
         fi
     else
-        printf "${YELLOW}  ⚠ okam CLI não encontrado. Pulando validação OKF.${RESET}\n"
+        OKF_SKIPPED=1
+        printf "${YELLOW}  ⚠ okam CLI não encontrado no PATH. Validação OKF NÃO executada.${RESET}\n"
         printf "${YELLOW}    Instale com: pip install okam${RESET}\n"
+        printf "${YELLOW}    Se usa venv, confirme que ele está ativo para os hooks do Git.${RESET}\n"
     fi
 fi
 
@@ -99,7 +105,9 @@ if [ "$ERRORS" -gt 0 ]; then
     exit 1
 fi
 
-if [ -n "$WIKI_FILES" ]; then
+if [ "$OKF_SKIPPED" -eq 1 ]; then
+    printf "${YELLOW}${BOLD}⬡ Okam: Commit liberado, mas SEM validação OKF (okam ausente do PATH).${RESET}\n"
+elif [ -n "$WIKI_FILES" ]; then
     printf "${GREEN}${BOLD}⬡ Okam: Todas as verificações passaram.${RESET}\n"
 fi
 
