@@ -1,4 +1,4 @@
-name: OKF Compliance CI
+name: CI
 
 on:
   push:
@@ -24,7 +24,11 @@ jobs:
       - name: Install Okam Package
         run: |
           python -m pip install --upgrade pip
-          pip install -e .
+          pip install -e ".[dev]"
+
+      - name: Run Test Suite
+        run: |
+          python -m pytest tests/ -q
 
       - name: Run OKF Validation
         run: |
