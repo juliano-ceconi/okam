@@ -45,6 +45,7 @@ O projeto utiliza o padrão **Open Knowledge Format (OKF)** para evitar a redesc
 
 ## Proibições Cruciais
 
+- **Zero Auto-Close Trails**: É proibido encerrar, inativar ou converter `_proximo_prompt.md` em `fechamento.md` sem autorização explícita do usuário.
 - **Zero Temporary Files**: É proibido usar arquivos temporários para lógica de negócio ou dados persistentes.
 - **No Secret Leaks**: Nunca grave segredos, dumps de banco ou chaves de API nos artefatos.
 
@@ -54,3 +55,19 @@ O projeto utiliza o padrão **Open Knowledge Format (OKF)** para evitar a redesc
 2. **EXECUTION**: Mudanças pequenas, focadas e reversíveis.
 3. **VERIFICATION**: Validar via `walkthrough.md` e evidências reais.
 4. **HANDOFF**: Ao encerrar a sessão, resumir o progresso e apontar os próximos passos claros.
+
+## Trilhas de Trabalho (`__task-atual/`)
+
+Frente de trabalho que não cabe em uma única sessão vira **trilha**: uma pasta em
+`__task-atual/<trilha>/` com `plano.md` (blocos e critérios de pronto) e
+`_proximo_prompt.md` (handoff da próxima sessão).
+
+- **Índice**: `__task-atual/mapa-de-trilhas.md` — só estado; nunca serve de handoff.
+- **Continuidade**: sessão que usa uma trilha DEVE atualizar o `_proximo_prompt.md` dela
+  antes de encerrar.
+- **Encerramento**: exige autorização prévia, explícita e inequívoca do usuário. Fechar =
+  renomear `_proximo_prompt.md` para `fechamento.md` e mover a pasta para
+  `__task-atual/_finalizadas/<trilha>/`. **Proibido auto-encerrar trilha**, mesmo com
+  todos os blocos concluídos.
+- **Auditoria**: `python scripts/validate_trilhas.py` (exit 1 = drift).
+- Playbooks completos na skill `/gestao-trilhas`.
