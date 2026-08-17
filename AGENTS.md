@@ -12,7 +12,7 @@ Este é um repositório de inteligência com governança centralizada. A estrat�
 
 ## Pipeline de Inteligência (Core Agent Pipeline)
 
-Todos os agentes devem seguir o fluxo `/deep-metadata-pipeline` para garantir que o contexto nunca seja perdido:
+Todos os agentes devem seguir o fluxo abaixo para garantir que o contexto nunca seja perdido. No Claude Code, a skill `/analise-profunda` executa este pipeline:
 
 1. **Scanner** (Técnico): Listar arquivos, identificar stacks e dependências críticas.
 2. **Relational** (Psique): Deduzir o "porquê" do código e suas conexões inter-projeto.

@@ -11,3 +11,12 @@ __pycache__/
 *.pyc
 .vscode/
 .idea/
+
+# Junction de descoberta de skills do Claude Code.
+# A fonte versionada e `.agents/skills/` (compartilhada com Codex/AGY). O Claude Code
+# so descobre skills de projeto em `.claude/skills/`, entao esse caminho e uma Junction
+# para o mesmo conteudo — link de sistema de arquivos, nao deve ser versionado.
+# Recriar (PowerShell; -Target de Junction exige caminho ABSOLUTO, relativo falha):
+#   $r = (Get-Location).Path
+#   New-Item -ItemType Junction -Path "$r\.claude\skills" -Target "$r\.agents\skills"
+.claude/skills/
