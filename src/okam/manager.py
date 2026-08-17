@@ -150,7 +150,12 @@ def validate_wiki_links(filepath, body):
                 all_pages.add(name_without_ext)
                 
     for link in links:
-        link_target = link.strip().lower()
+        # Wiki-link aceita ancora de cabecalho: [[Pagina#Secao]] ou [[#Secao]].
+        # Só a parte antes do '#' identifica a pagina; ancora sozinha aponta para a
+        # propria pagina e nao tem alvo externo a validar.
+        link_target = link.split('#', 1)[0].strip().lower()
+        if not link_target:
+            continue
         if link_target == "root":
             continue
         # Se for link no formato [[nome-arquivo]], limpamos

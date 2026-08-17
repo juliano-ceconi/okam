@@ -85,6 +85,36 @@ def test_wiki_link_quebrado_falha(tmp_path):
     assert any("quebrado" in e for e in errors)
 
 
+def test_wiki_link_com_ancora_de_cabecalho_passa(tmp_path):
+    _write(tmp_path, "index.md", VALID_PAGE.replace("Página de Teste", "Index"))
+    conteudo = VALID_PAGE.replace(
+        "Corpo da página.", "Veja [[index#Alguma Seção (com parênteses)|Index]]."
+    )
+    filepath = _write(tmp_path, "pagina.md", conteudo)
+    is_valid, errors = validate_file(filepath)
+    assert is_valid, errors
+
+
+def test_wiki_link_ancora_da_propria_pagina_passa(tmp_path):
+    _write(tmp_path, "index.md", VALID_PAGE.replace("Página de Teste", "Index"))
+    conteudo = VALID_PAGE.replace("Corpo da página.", "Veja [[#Seção Local]].")
+    filepath = _write(tmp_path, "pagina.md", conteudo)
+    is_valid, errors = validate_file(filepath)
+    assert is_valid, errors
+
+
+def test_wiki_link_quebrado_com_ancora_ainda_falha(tmp_path):
+    """A separação no '#' não pode mascarar página inexistente."""
+    _write(tmp_path, "index.md", VALID_PAGE.replace("Página de Teste", "Index"))
+    conteudo = VALID_PAGE.replace(
+        "Corpo da página.", "Veja [[pagina-inexistente#Alguma Seção]]."
+    )
+    filepath = _write(tmp_path, "pagina.md", conteudo)
+    is_valid, errors = validate_file(filepath)
+    assert not is_valid
+    assert any("quebrado" in e for e in errors)
+
+
 def test_roundtrip_preserva_frontmatter(tmp_path):
     filepath = _write(tmp_path, "pagina.md", VALID_PAGE)
     frontmatter, body = load_markdown_file(filepath)

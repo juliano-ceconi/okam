@@ -65,6 +65,20 @@ okam doctor
 
 > **Nota:** O script legado `python ./knowledge/scripts/okf_manager.py` continua funcionando como wrapper de compatibilidade.
 
+### Wiki-links e âncoras de cabeçalho
+
+A validação de wiki-links resolve a página pela parte **antes do `#`**. Todas estas formas são aceitas:
+
+| Forma | Alvo validado |
+|:---|:---|
+| `[[Pagina]]` | `Pagina` |
+| `[[Pagina\|Alias]]` | `Pagina` |
+| `[[Pagina#Seção]]` | `Pagina` |
+| `[[Pagina#Seção\|Alias]]` | `Pagina` |
+| `[[#Seção]]` | nenhum — âncora da própria página, ignorada |
+
+Página inexistente continua sendo erro mesmo com âncora: `[[Inexistente#Seção]]` falha.
+
 ## Regras de Ouro
 
 1. **Title = H1**: O campo `title` no frontmatter deve ser idêntico ao primeiro `# Heading` do corpo.
