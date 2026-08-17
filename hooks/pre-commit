@@ -17,8 +17,12 @@ ERRORS=0
 OKF_SKIPPED=0
 
 # ── 1. OKF Validation ──────────────────────────────────────────────────────
-# Find staged .md files in wiki directories
-WIKI_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '(knowledge/wiki|wiki)/.*\.md$' || true)
+# Find staged .md files in wiki directories.
+# A regex ancora em separador de caminho e roda case-insensitive: sem a ancora,
+# qualquer pasta terminada em "wiki" casava (ex.: skills/llm-wiki/SKILL.md, que nao
+# e pagina de Wiki); sem -i, um diretorio capitalizado (ex.: _Conhecimento/Wiki/)
+# nunca era validado.
+WIKI_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -Ei '(^|/)(knowledge/wiki|wiki)/.*\.md$' || true)
 
 if [ -n "$WIKI_FILES" ]; then
     printf "${BLUE}${BOLD}⬡ Okam pre-commit: Validando conformidade OKF...${RESET}\n"

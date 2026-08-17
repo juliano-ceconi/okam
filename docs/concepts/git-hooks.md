@@ -18,7 +18,7 @@ Sem hooks, a conformidade depende de disciplina individual ou de esperar o CI fa
 
 Roda antes de cada `git commit`. Faz duas coisas:
 
-1. **Validação OKF**: Verifica se arquivos `.md` staged em `knowledge/wiki/` têm frontmatter válido
+1. **Validação OKF**: Verifica se arquivos `.md` staged em um diretório `wiki/` (ou `knowledge/wiki/`) têm frontmatter válido. A seleção é case-insensitive — `_Conhecimento/Wiki/` entra — e ancorada em segmento de caminho, então pastas que apenas terminam em "wiki" (ex.: `skills/llm-wiki/`) ficam de fora
 2. **Detecção de segredos**: Scan por regex em todos os arquivos staged:
    - Chaves AWS (`AKIA...`)
    - Tokens de API (`sk-...`, `ghp_...`, `glpat-...`, `xoxb-...`)
