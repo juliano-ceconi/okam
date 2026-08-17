@@ -1,9 +1,9 @@
 ---
-name: SecretLeakAudit
+name: auditoria-de-segredos
 description: Diretrizes de auditoria de segurança ativa para detectar e higienizar segredos ou chaves privadas expostas antes do commit.
 ---
 
-# 🛡️ Secret Leak Audit
+# 🛡️ Auditoria de Segredos
 
 Esta skill guia o agente a inspecionar ativamente o repositório em busca de credenciais e chaves secretas expostas em arquivos de texto aberto.
 

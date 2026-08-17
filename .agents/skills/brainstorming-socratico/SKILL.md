@@ -1,9 +1,9 @@
 ---
-name: SocraticBrainstorming
+name: brainstorming-socratico
 description: Protocolo de comunicação socrática para alinhar escopo, regras e trade-offs arquiteturais com o usuário antes de codificar.
 ---
 
-# 🧠 Socratic Brainstorming
+# 🧠 Brainstorming Socrático
 
 Use esta skill sempre que se deparar com uma nova tarefa complexa, requisitos pouco claros ou decisões de arquitetura e design com múltiplos trade-offs.
 

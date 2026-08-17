@@ -1,9 +1,9 @@
 ---
-name: AgenticTestingCompanion
+name: testes-automatizados
 description: Diretrizes e padrões para a criação, execução e validação de testes automatizados locais.
 ---
 
-# 🧪 Agentic Testing Companion
+# 🧪 Testes Automatizados
 
 Esta skill guia o agente de IA no desenvolvimento orientado a testes (TDD) e na validação rigorosa de implementações locais para evitar regressões.
 
@@ -19,7 +19,7 @@ Esta skill guia o agente de IA no desenvolvimento orientado a testes (TDD) e na 
 - Antes de implementar novos testes, localize a pasta de testes do projeto (ex: `tests/`, `__tests__/`).
 - Verifique qual ferramenta/framework é usada (`pytest`, `unittest`, `jest`, `vitest`).
 
-### 2. Adicionar Casos de Teste (Surgical Addition)
+### 2. Adicionar Casos de Teste (adição cirúrgica)
 - Adicione testes unitários para toda nova função ou classe implementada.
 - Garanta cobertura de:
   - **Happy Path:** O caminho esperado de sucesso.

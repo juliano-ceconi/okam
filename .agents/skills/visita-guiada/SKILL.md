@@ -1,9 +1,9 @@
 ---
-name: GuidedTourCreator
+name: visita-guiada
 description: Guia para criação de mapas de onboarding (TOUR.md) para agentes de IA que entram no projeto.
 ---
 
-# 🗺️ Guided Tour Creator
+# 🗺️ Visita Guiada do Projeto
 
 Use esta skill para criar ou atualizar um documento `TOUR.md` que serve como mapa de navegação rápido para agentes de IA e desenvolvedores que acabam de entrar no projeto.
 

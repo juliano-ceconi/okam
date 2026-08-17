@@ -1,9 +1,9 @@
 ---
-name: DeepMetadataAnalysis
+name: analise-profunda
 description: Executa o pipeline de análise profunda em um projeto para extrair sua "alma" e atualizar a governança.
 ---
 
-# 🔭 Deep Metadata Analysis
+# 🔭 Análise Profunda de Metadados
 
 Use esta skill para realizar uma análise holística de um projeto, inspirada no padrão "Understand Anything".
 

@@ -1,9 +1,9 @@
 ---
-name: MemoryMaintenance
+name: manutencao-de-memoria
 description: Extrai lições aprendidas e destila no índice de conhecimento para evitar repetição de erros.
 ---
 
-# 🧠 Memory Maintenance
+# 🧠 Manutenção de Memória
 
 Esta skill deve ser invocada sempre que uma sessão de trabalho termina ou uma lição importante é aprendida.
 

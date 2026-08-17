@@ -1,9 +1,9 @@
 ---
-name: ContextLoopManager
+name: ciclos-de-contexto
 description: Gerencia e otimiza a janela de contexto de agentes de IA através da execução de tarefas divididas em blocos de ciclo fechado (~100k tokens).
 ---
 
-# 🔄 Context Loop Manager
+# 🔄 Ciclos de Contexto
 
 Esta skill ensina agentes de IA a trabalhar com tarefas grandes de forma modular e em ciclo fechado, evitando o estouro e a degradação da janela de contexto.
 

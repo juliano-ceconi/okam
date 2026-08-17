@@ -142,16 +142,19 @@ O Okam já vem com um conjunto de skills prontas na pasta `.agents/skills/` para
 
 | Skill | Finalidade |
 |:---|:---|
-| `deep-metadata-analysis` | Extrai a "alma" do projeto mapeando sua stack e regras de negócio. |
-| `knowledge-wiki` | Auxilia na ingestão (ingest), consultas (query) e linting das páginas de conhecimento OKF. |
-| `memory-maintenance` | Eterniza lições aprendidas no fim das sessões de trabalho para futuras IAs. |
-| `guided-tour-creator` | Cria e atualiza o mapa `TOUR.md` de onboarding do projeto. |
-| `surgical-code-editor` | Ensina o agente a realizar alterações de baixo churn de forma localizada. |
-| `socratic-brainstorming` | Protocolo para esclarecer escopo e arquitetura com o usuário antes de codificar. |
-| `agentic-testing-companion` | Padrões de desenvolvimento orientado a testes (TDD) locais. |
-| `secret-leak-audit` | Varredura e higienização de chaves de API expostas em arquivos locais. |
-| `context-loop-manager` | Gestão de escopos de tarefas complexas rodando em múltiplos blocos isolados. |
+| `analise-profunda` | Extrai a "alma" do projeto mapeando sua stack e regras de negócio. |
+| `wiki-de-conhecimento` | Auxilia na ingestão, consulta e auditoria das páginas de conhecimento OKF. |
+| `manutencao-de-memoria` | Eterniza lições aprendidas no fim das sessões de trabalho para futuras IAs. |
+| `visita-guiada` | Cria e atualiza o mapa `TOUR.md` de onboarding do projeto. |
+| `edicao-cirurgica` | Ensina o agente a realizar alterações de baixo churn de forma localizada. |
+| `brainstorming-socratico` | Protocolo para esclarecer escopo e arquitetura com o usuário antes de codificar. |
+| `testes-automatizados` | Padrões de desenvolvimento orientado a testes (TDD) locais. |
+| `auditoria-de-segredos` | Varredura e higienização de chaves de API expostas em arquivos locais. |
+| `ciclos-de-contexto` | Gestão de escopos de tarefas complexas rodando em múltiplos blocos isolados. |
 | `checklists` | Checklists operacionais reutilizáveis para fechamento de tarefas. |
+| `guardrails-fundamentais` | Quatro travas de decisão: ambiguidade, trade-off de negócio, conhecimento datado e escopo grande demais. |
+| `passo-a-passo` | Condução guiada, um passo por vez, quando a execução exige ação manual do usuário. |
+| `gestao-trilhas` | Ciclo de vida de trilhas de trabalho longas: abertura, transição de bloco, fechamento e auditoria. |
 
 ## Próximos Passos
 

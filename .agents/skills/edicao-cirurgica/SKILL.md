@@ -1,9 +1,9 @@
 ---
-name: SurgicalCodeEditor
+name: edicao-cirurgica
 description: Diretrizes de refatoração cirúrgica e baixo churn, otimizando o uso de ferramentas de escrita localizadas.
 ---
 
-# ✂️ Surgical Code Editor
+# ✂️ Edição Cirúrgica de Código
 
 Esta skill define as melhores práticas para a modificação de arquivos de código, garantindo baixo churn (menor índice de modificações irrelevantes) e máxima preservação da lógica pré-existente.
 

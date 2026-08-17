@@ -1,9 +1,9 @@
 ---
-name: KnowledgeWiki
+name: wiki-de-conhecimento
 description: Operações de Ingest, Query e Lint para manter o sistema de conhecimento persistente.
 ---
 
-# 📚 Knowledge Wiki
+# 📚 Wiki de Conhecimento
 
 Esta skill define as operações para manter o sistema de conhecimento persistente do workspace.
 

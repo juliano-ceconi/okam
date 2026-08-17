@@ -28,7 +28,7 @@ O projeto utiliza o padrão **Open Knowledge Format (OKF)** para evitar a redesc
 - **Valores de Type**: Os tipos devem ser `index`, `concept`, `architecture`, `runbook`, `entity` ou `benchmark`.
 - **Validação**: Antes de criar ou modificar qualquer documento na Wiki, o agente deve validar a conformidade rodando `python ./knowledge/scripts/okf_manager.py --validate`.
 - **Indexação**: Use `python ./knowledge/scripts/okf_manager.py --dump-index` para consultar rapidamente o índice de metadados de toda a Wiki antes de planejar mudanças.
-- **Manutenção**: Use a skill `/knowledge-wiki` para operações de Ingest e Auditoria.
+- **Manutenção**: Use a skill `/wiki-de-conhecimento` para operações de Ingest e Auditoria.
 
 ## Persistência e Economia de Contexto
 

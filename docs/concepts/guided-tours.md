@@ -61,4 +61,4 @@ Bem-vindo ao **Nome do Projeto**. Este documento serve como guia rápido.
 
 ## Integração com Okam
 
-O template `templates/tour-template.md` já vem pronto para uso. A skill `deep-metadata-analysis` gera dados que alimentam o TOUR.md automaticamente.
+O template `templates/tour-template.md` já vem pronto para uso. A skill `analise-profunda` gera dados que alimentam o TOUR.md automaticamente.

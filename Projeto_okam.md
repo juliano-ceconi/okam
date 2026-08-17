@@ -79,3 +79,15 @@ Detalhes e verificação no adendo de 22/07 do artefato acima.
   Validava a pasta errada e nunca a certa. Agora `grep -Ei '(^|/)(knowledge/wiki|wiki)/.*\.md$'`.
 - [x] **Release** — bump `0.6.0` → `0.6.1` para que `okam hooks install` passe a entregar o
   hook corrigido a partir do PyPI, em vez de depender de fix manual em `.git/hooks/`.
+
+### Catálogo de skills em português — v0.6.2 (2026-08-17)
+- [x] **Nomes traduzidos** — as 10 skills nativas passaram a ter diretório e `name:` em
+  pt-BR (ex.: `knowledge-wiki` → `wiki-de-conhecimento`, `surgical-code-editor` →
+  `edicao-cirurgica`). O okam é material para desenvolvedores brasileiros; nome de skill
+  é interface de invocação (`/nome`) e estava em inglês.
+- [x] **3 skills novas** — `guardrails-fundamentais` (travas de decisão), `passo-a-passo`
+  (condução guiada) e `gestao-trilhas` (ciclo de vida de trilhas longas, generalizada
+  para não depender de ferramenta local do workspace).
+- [x] **Referências alinhadas** — README, QUICKSTART, AGENTS.md, landing e docs.
+- Nota de upgrade: `install_native_skills` é não-destrutivo, então quem já tinha o
+  catálogo antigo mantém as pastas em inglês após atualizar; remoção é manual.
