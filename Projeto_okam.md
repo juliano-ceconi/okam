@@ -71,3 +71,11 @@ Revisão focada em usabilidade para terceiros. Artefato:
 
 **Como lançar:** `git tag vX.Y.Z && git push origin vX.Y.Z` (bump de `__version__` antes).
 Detalhes e verificação no adendo de 22/07 do artefato acima.
+
+### Correção do pre-commit — v0.6.1 (2026-08-17)
+- [x] **Seleção de arquivos de Wiki no `pre-commit`** — a regex `(knowledge/wiki|wiki)/.*\.md$`
+  não tinha âncora de segmento e era case-sensitive: casava qualquer pasta terminada em
+  "wiki" (ex.: `skills/llm-wiki/`) e ignorava diretório capitalizado (ex.: `_Conhecimento/Wiki/`).
+  Validava a pasta errada e nunca a certa. Agora `grep -Ei '(^|/)(knowledge/wiki|wiki)/.*\.md$'`.
+- [x] **Release** — bump `0.6.0` → `0.6.1` para que `okam hooks install` passe a entregar o
+  hook corrigido a partir do PyPI, em vez de depender de fix manual em `.git/hooks/`.
